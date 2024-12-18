@@ -1,1 +1,7 @@
 *.log
+*.jou
+
+create_new_rm/abstract_shells/*
+!create_new_rm/abstract_shells/.gitkeep
+
+**/project_1/
