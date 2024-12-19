@@ -1170,7 +1170,7 @@ proc create_hier_cell_static_shell { parentCell nameHier } {
   set smartconnect_config [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_config ]
   set_property -dict [ list \
    CONFIG.NUM_CLKS {1} \
-   CONFIG.NUM_MI {2} \
+   CONFIG.NUM_MI {1} \
    CONFIG.NUM_SI {1} \
  ] $smartconnect_config
 
