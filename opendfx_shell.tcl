@@ -40,7 +40,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 # source opendfx_shell_script.tcl
 
 
-# The design that will be created by this Tcl script contains the following 
+# The design that will be created by this Tcl script contains the following
 # block design container source references:
 # AES128, AES192, DPU_512, FFT_4channel, FIR_compiler, pp_pipeline
 
@@ -53,7 +53,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
    create_project project_1 project_1 -part xck26-sfvc784-2LV-c -force
-   set repoPath {./../ip_repo} 
+   set repoPath {./../ip_repo}
    set_property ip_repo_paths $repoPath  [current_project]
    update_ip_catalog
    set_param bd.enableDFX 1
@@ -72,7 +72,7 @@ cr_bd_FFT_4channel "" FFT_4channel
 cr_bd_FIR_compiler "" FIR_compiler
 cr_bd_AES192 "" AES192
 cr_bd_DPU_512 "" DPU_512
-cr_bd_pp_pipeline "" pp_pipeline 
+cr_bd_pp_pipeline "" pp_pipeline
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -115,7 +115,7 @@ if { ${design_name} eq "" } {
    set errMsg "Design <$design_name> already exists in your project, please set the variable <design_name> to another value."
    set nRet 1
 } elseif { [get_files -quiet ${design_name}.bd] ne "" } {
-   # USE CASES: 
+   # USE CASES:
    #    6) Current opened design, has components, but diff names, design_name exists in project.
    #    7) No opened design, design_name exists in project.
 
@@ -149,7 +149,7 @@ set bCheckIPsPassed 1
 ##################################################################
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
-   set list_check_ips "\ 
+   set list_check_ips "\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:xlslice:1.0\
@@ -196,7 +196,7 @@ set map_bdc_missing(DFX) ""
 set map_bdc_missing(BDC) ""
 
 if { $bCheckSources == 1 } {
-   set list_check_srcs "\ 
+   set list_check_srcs "\
 AES192 \
 AES128 \
 FFT_4channel \
