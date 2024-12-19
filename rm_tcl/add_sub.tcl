@@ -1,12 +1,10 @@
 # Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
-
-# Proc to create BD add_sub_RP_0
-proc cr_bd_axis_rm { parentCell designName rpName } {
+# Proc to create BD ADDSUB
+proc cr_bd_ADDSUB { parentCell designName } {
 
   # CHANGE DESIGN NAME HERE
-  set design_name ""
-  append design_name $designName "_" $rpName
+  set design_name $designName
 
   common::send_gid_msg -ssname BD::TCL -id 2010 -severity "INFO" "Currently there is no design <$design_name> in project, so creating one..."
 
@@ -263,18 +261,8 @@ proc cr_bd_axis_rm { parentCell designName rpName } {
 
   # Create address segments
   assign_bd_address -external -dict [list offset 0x00000000 range 0x80000000 offset 0x000200000000 range 0x40000000 offset 0x000280000000 range 0x40000000 offset 0x000800000000 range 0x000800000000 offset 0xC0000000 range 0x20000000 offset 0xFF000000 range 0x01000000] -target_address_space [get_bd_addr_spaces rm_comm_box_0/m_axi_gmem] [get_bd_addr_segs M_AXI_GMEM/Reg] -force
-if { $rpName eq "RP_0"} {
   assign_bd_address -offset 0x80000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs AccelConfig_0/s_axi_ctrl/reg0] -force
   assign_bd_address -offset 0x81000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs rm_comm_box_0/s_axi_control/reg0] -force
-}
-if { $rpName eq "RP_1"} {
-  assign_bd_address -offset 0x82000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs AccelConfig_0/s_axi_ctrl/reg0] -force
-  assign_bd_address -offset 0x83000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs rm_comm_box_0/s_axi_control/reg0] -force
-}
-if { $rpName eq "RP_2"} {
-  assign_bd_address -offset 0x84000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs AccelConfig_0/s_axi_ctrl/reg0] -force
-  assign_bd_address -offset 0x85000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces S_AXI_CTRL] [get_bd_addr_segs rm_comm_box_0/s_axi_control/reg0] -force
-}
 
   # Restore current instance
   current_bd_instance $oldCurInst
@@ -283,4 +271,4 @@ if { $rpName eq "RP_2"} {
   save_bd_design
   close_bd_design $design_name
 }
-# End of cr_bd_add_sub_RP_0()
+# End of cr_bd_ADDSUB()
