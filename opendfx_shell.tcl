@@ -2999,7 +2999,7 @@ update_compile_order -fileset sim_1
 
 #Create DFX Configurations
 setup_pr_configurations
-create_pr_configuration -name config_7 -partitions { }  -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 ]
+create_pr_configuration -name config_7 -partitions { }  -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 opendfx_shell_i/RP_2 ]
 create_run child_0_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_7
 
 # launch_runs impl_1 -to_step write_bitstream -jobs 16
