@@ -3013,6 +3013,6 @@ write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wra
 # wait_on_run child_1_impl_1
 # wait_on_run child_2_impl_1
 open_run impl_1
-write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./abstract_shell_RP_0.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./abstract_shell_RP_1.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./abstract_shell_RP_2.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./project_1/abstract_shell_RP_0.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./project_1/abstract_shell_RP_1.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./project_1/abstract_shell_RP_2.dcp
