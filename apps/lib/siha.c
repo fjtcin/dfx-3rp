@@ -6,6 +6,7 @@
 
 static volatile uint8_t* RMCOMMBOX[] = {
 		NULL,
+		NULL,
 		NULL
 };
 
@@ -32,6 +33,8 @@ int InitializeMapRMs(int slot)
 		configDMSlots(0, m_rms->RMCommBox_0);
 	else if(1 == slot)
 		configDMSlots(1, m_rms->RMCommBox_1);
+	else if(2 == slot)
+		configDMSlots(2, m_rms->RMCommBox_2);
 	return 0;
 }
 
@@ -75,6 +78,22 @@ int initRMs(int slot){
 			printf("Failed to open UIO_RMCommBox_SLOT1 device\n");
 			return -1;
 		}
+	} else if(2 == slot)
+	{
+		dfxmgr_uio_by_name(AccelConfig_uio_path, slot, "AccelConfig");
+		m_rms->AccelConfig_2_fd = open(AccelConfig_uio_path, O_RDWR | O_SYNC);
+		if(m_rms->AccelConfig_2_fd < 0)
+		{
+			printf("Failed to open UIO_AccelConfig_SLOT2 device\n");
+			return -1;
+		}
+		dfxmgr_uio_by_name(rm_comm_box_uio_path, slot, "rm_comm_box");
+		m_rms->RMCommBox_2_fd = open(rm_comm_box_uio_path, O_RDWR | O_SYNC);
+		if(m_rms->RMCommBox_2_fd < 0)
+		{
+			printf("Failed to open UIO_RMCommBox_SLOT2 device\n");
+			return -1;
+		}
 	}
 	return 0;
 }
@@ -111,6 +130,19 @@ int mapRMs(int slot){
 			printf("Mmap RMCommBox_1 failed !!\n");
 			return -1;
 		}
+	} else if(2 == slot)
+	{
+		m_rms->AccelConfig_2 = (uint8_t*) mmap(NULL, ACCELCONFIG_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, m_rms->AccelConfig_2_fd, 0);
+		if(m_rms->AccelConfig_2 == MAP_FAILED){
+			printf("Mmap AccelConfig_2 failed !!\n");
+			return -1;
+		}
+
+		m_rms->RMCommBox_2 = (uint8_t*) mmap(NULL, RMCOMMBOX_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, m_rms->RMCommBox_2_fd, 0);
+		if(m_rms->RMCommBox_2 == MAP_FAILED){
+			printf("Mmap RMCommBox_2 failed !!\n");
+			return -1;
+		}
 	}
 	return 0;
 }
@@ -129,6 +161,10 @@ int unmapRMs(int slot){
 	{
 		munmap(m_rms->AccelConfig_1, ACCELCONFIG_LEN);
 		munmap(m_rms->RMCommBox_1, RMCOMMBOX_LEN);
+	} else if(2 == slot)
+	{
+		munmap(m_rms->AccelConfig_2, ACCELCONFIG_LEN);
+		munmap(m_rms->RMCommBox_2, RMCOMMBOX_LEN);
 	}
 	return 0;
 }
@@ -139,6 +175,8 @@ int StartAccel(int slot){
 		AccelConfig = m_rms->AccelConfig_0;
 	else if(1 == slot)
 		AccelConfig = m_rms->AccelConfig_1;
+	else if(2 == slot)
+		AccelConfig = m_rms->AccelConfig_2;
 	*(uint32_t*)(AccelConfig) = 0x81;
 	return 0;
 }
@@ -149,6 +187,8 @@ int StopAccel(int slot){
 		AccelConfig = m_rms->AccelConfig_0;
 	else if(1 == slot)
 		AccelConfig = m_rms->AccelConfig_1;
+	else if(2 == slot)
+		AccelConfig = m_rms->AccelConfig_2;
 	*(uint32_t*)(AccelConfig) = 0x0;
 	return 0;
 }
@@ -213,5 +253,9 @@ void closeFDs(int slot) {
 	{
 		close(m_rms->AccelConfig_1_fd);
 		close(m_rms->RMCommBox_1_fd);
+	} else if(2 == slot)
+	{
+		close(m_rms->AccelConfig_2_fd);
+		close(m_rms->RMCommBox_2_fd);
 	}
 }

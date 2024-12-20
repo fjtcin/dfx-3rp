@@ -38,13 +38,17 @@ typedef struct{
 	int SIHAMgr_fd;
 	int AccelConfig_0_fd;
 	int AccelConfig_1_fd;
+	int AccelConfig_2_fd;
 	int RMCommBox_0_fd;
 	int RMCommBox_1_fd;
+	int RMCommBox_2_fd;
 	uint8_t* SIHAMgr;
 	uint8_t* AccelConfig_0;
 	uint8_t* AccelConfig_1;
+	uint8_t* AccelConfig_2;
 	uint8_t* RMCommBox_0;
 	uint8_t* RMCommBox_1;
+	uint8_t* RMCommBox_2;
 }RMs;
 
 RMs * m_rms;
