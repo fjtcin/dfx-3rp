@@ -5,17 +5,18 @@
 #The abstract shells were created from the shell by using the following command for eacg RP.
 #write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./abstract_shell_RP_0.dcp
 #write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./abstract_shell_RP_1.dcp
+#write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./abstract_shell_RP_2.dcp
 
 proc generate_rm { arg1 { arg2 RP_0 }} {
   set designName $arg1
   set targetRP $arg2
 
   if { $designName eq "-help" } {
-    puts "Usage:\ngenerate_rm <designName> <targetRP>.\ntargetRP can be RP_0 or RP_1"
+    puts "Usage:\ngenerate_rm <designName> <targetRP>.\ntargetRP can be RP_0, RP_1, RP_2"
     return
   }
-  if { $targetRP ne "RP_0" && $targetRP ne "RP_1" } {
-      puts "Allowed values for targetRP is RP_0, RP_1."
+  if { $targetRP ne "RP_0" && $targetRP ne "RP_1" && $targetRP ne "RP_2" } {
+      puts "Allowed values for targetRP is RP_0, RP_1, RP_2."
   return
   }
 
@@ -36,6 +37,11 @@ proc generate_rm { arg1 { arg2 RP_0 }} {
   set slot1_accel_json "{\n  \"AccelHandshakeType\": \"streamDataFromTrg\",\n  \"accel_devices\": \[\n    {\n      \"dev_name\": \"82000000.AccelConfig\",\n      \"reg_base\": \"\",\n      \"reg_size\": \"65536\"\n    },\n    {\n      \"dev_name\": \"83000000.rm_comm_box\",\n      \"reg_base\": \"\",\n      \"reg_size\": \"\"\n    }\n  \],\n  \"accel_metadata\": {},\n  \"accel_type\": \"SIHA_PL_DFX\"\n}"
 
   set slot1_dtsi "\/*\n * Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.\n * SPDX-License-Identifier: MIT\n */\n\n\/dts-v1\/;\n\/plugin\/;\n\/ {\n	fragment@0 {\n		target = <&fpga_PR1>;\n    	__overlay__ {\n		firmware-name = \"opendfx_shell_i_RP_1_newRM_partial.bit.bin\";\n		partial-fpga-config ;\n		};\n	};\n\n\n};"
+
+
+  set slot2_accel_json "{\n  \"AccelHandshakeType\": \"streamDataFromTrg\",\n  \"accel_devices\": \[\n    {\n      \"dev_name\": \"84000000.AccelConfig\",\n      \"reg_base\": \"\",\n      \"reg_size\": \"65536\"\n    },\n    {\n      \"dev_name\": \"85000000.rm_comm_box\",\n      \"reg_base\": \"\",\n      \"reg_size\": \"\"\n    }\n  \],\n  \"accel_metadata\": {},\n  \"accel_type\": \"SIHA_PL_DFX\"\n}"
+
+  set slot2_dtsi "\/*\n * Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.\n * SPDX-License-Identifier: MIT\n */\n\n\/dts-v1\/;\n\/plugin\/;\n\/ {\n	fragment@0 {\n		target = <&fpga_PR2>;\n    	__overlay__ {\n		firmware-name = \"opendfx_shell_i_RP_2_newRM_partial.bit.bin\";\n		partial-fpga-config ;\n		};\n	};\n\n\n};"
 
   set flag [file exists "./output_files"]
   if { !$flag } {
@@ -85,6 +91,25 @@ proc generate_rm { arg1 { arg2 RP_0 }} {
     }
   }
 
+  if { ${targetRP} eq "RP_2" } {
+    set flag [file exists "./output_files/${designName}/${designName}_slot2"]
+    if { !$flag } {
+      exec mkdir "./output_files/${designName}/${designName}_slot2"
+      exec touch ./output_files/${designName}/${designName}_slot2/accel.json
+      set filename "./output_files/${designName}/${designName}_slot2/accel.json"
+      set fileId [open $filename "w"]
+      puts $fileId $slot2_accel_json
+      close $fileId
+      exec touch ./output_files/${designName}/${designName}_slot2/opendfx_shell_i_RP_2_${designName}_partial.dtsi
+      set filename "./output_files/${designName}/${designName}_slot2/opendfx_shell_i_RP_2_${designName}_partial.dtsi"
+      set fileId [open $filename "w"]
+      puts $fileId $slot2_dtsi
+      close $fileId
+      set replace [format {s/newRM/%s/} ${designName}]
+      exec /bin/sed -i $replace ./output_files/${designName}/${designName}_slot2/opendfx_shell_i_RP_2_${designName}_partial.dtsi
+    }
+  }
+
   set x opendfx_shell_i/${targetRP}
 
   #Read Abstract shell DCP
@@ -107,6 +132,9 @@ proc generate_rm { arg1 { arg2 RP_0 }} {
   }
   if { ${targetRP} eq "RP_1" } {
     write_bitstream -force -cell $x ./output_files/${designName}/${designName}_slot1/${rmBit}
+  }
+  if { ${targetRP} eq "RP_2" } {
+    write_bitstream -force -cell $x ./output_files/${designName}/${designName}_slot2/${rmBit}
   }
   close_project
 }
