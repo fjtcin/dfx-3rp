@@ -54,7 +54,7 @@ resize_pblock pblock_1 -add {CONFIG_SITE_X0Y0:CONFIG_SITE_X0Y0}
 resize_pblock pblock_1 -add {DSP48E2_X4Y24:DSP48E2_X12Y71}
 resize_pblock pblock_1 -add {GTHE4_CHANNEL_X0Y4:GTHE4_CHANNEL_X0Y11 GTHE4_COMMON_X0Y1:GTHE4_COMMON_X0Y2}
 resize_pblock pblock_1 -add {IOB_X1Y52:IOB_X1Y155}
-resize_pblock pblock_0 -add {PCIE40E4_X0Y1:PCIE40E4_X0Y1}
+resize_pblock pblock_1 -add {PCIE40E4_X0Y1:PCIE40E4_X0Y1}
 resize_pblock pblock_1 -add {RAMB18_X0Y24:RAMB18_X2Y71 RAMB36_X0Y12:RAMB36_X2Y35}
 resize_pblock pblock_1 -add {URAM288_X0Y16:URAM288_X0Y47}
 set_property CONTAIN_ROUTING 1 [get_pblocks pblock_1]
