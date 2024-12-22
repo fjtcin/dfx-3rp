@@ -1,14 +1,14 @@
 *.log
 *.jou
 *.str
+*.bit
+*.dcp
 
 create_new_rm/*
-!create_new_rm/abstract_shells
+!create_new_rm/abstract_shells/
 !create_new_rm/generate_rm.tcl
 !create_new_rm/hw_prj.tcl
-create_new_rm/abstract_shells/*
-!create_new_rm/abstract_shells/.gitkeep
 
 **/project*/
-**/.Xil
-**/hd_visual
+**/.Xil/
+**/hd_visual/

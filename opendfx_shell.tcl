@@ -146,9 +146,7 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:xlconcat:2.1\
-xilinx.com:ip:xlslice:1.0\
 xilinx.com:ip:zynq_ultra_ps_e:3.4\
-xilinx.com:ip:vcu:1.2\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:util_ds_buf:2.2\
 xilinx.com:ip:sync:1.0\
@@ -3007,12 +3005,13 @@ create_run child_0_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} 
 
 launch_runs impl_1 -to_step write_bitstream -jobs 16
 wait_on_run impl_1
-write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
+# write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
+exec cp ./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit ./configs/
 # launch_runs child_0_impl_1 child_1_impl_1 child_2_impl_1 -to_step write_bitstream -jobs 16
 # wait_on_run child_0_impl_1
 # wait_on_run child_1_impl_1
 # wait_on_run child_2_impl_1
 open_run impl_1
-write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./project_1/abstract_shell_RP_0.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./project_1/abstract_shell_RP_1.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./project_1/abstract_shell_RP_2.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./create_new_rm/abstract_shells/abstract_shell_RP_1.dcp
+write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./create_new_rm/abstract_shells/abstract_shell_RP_2.dcp
