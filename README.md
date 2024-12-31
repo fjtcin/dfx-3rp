@@ -1,5 +1,11 @@
 # dfx-3rp
 
+## clean local repo
+
+```bash
+git clean -dfX
+```
+
 ## generate RPs
 
 ```bash

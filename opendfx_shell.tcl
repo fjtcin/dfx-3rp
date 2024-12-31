@@ -42,7 +42,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following
 # block design container source references:
-# ADDSUB, AES128, AES192
+# ADDSUB
 
 # Please add the sources before sourcing this Tcl script.
 
@@ -61,12 +61,8 @@ if { $list_projs eq "" } {
 }
 
 source ./rm_tcl/add_sub.tcl
-source ./rm_tcl/aes128encdec.tcl
-source ./rm_tcl/aes192encdec.tcl
 
 cr_bd_ADDSUB "" ADDSUB
-cr_bd_AES128 "" AES128
-cr_bd_AES192 "" AES192
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -180,7 +176,7 @@ xilinx.com:ip:util_vector_logic:2.0\
 ##################################################################
 set bCheckSources 1
 set list_bdc_active "ADDSUB"
-set list_bdc_dfx "AES128, AES192"
+set list_bdc_dfx ""
 
 array set map_bdc_missing {}
 set map_bdc_missing(ACTIVE) ""
@@ -189,8 +185,6 @@ set map_bdc_missing(BDC) ""
 
 if { $bCheckSources == 1 } {
    set list_check_srcs "\
-AES192 \
-AES128 \
 ADDSUB \
 "
 
@@ -2885,8 +2879,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_0
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_0/M_AXI_GMEM]
@@ -2898,8 +2892,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_1
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_1/M_AXI_GMEM]
@@ -2911,8 +2905,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:AES128.bd:AES192.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_2
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
@@ -2968,7 +2962,7 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x81000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_0/rm_comm_box_0/s_axi_control/reg0] -force
   assign_bd_address -offset 0x83000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_1/rm_comm_box_0/s_axi_control/reg0] -force
   assign_bd_address -offset 0x85000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_2/rm_comm_box_0/s_axi_control/reg0] -force
-  assign_bd_address -offset 0xA0100000 -range 0x00010000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs static_shell/dfx_slot_manager/siha_manager_0/s_axi/reg0] -force
+  assign_bd_address -offset 0xA0000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs static_shell/dfx_slot_manager/siha_manager_0/s_axi/reg0] -force
 
 
   # Restore current instance
@@ -3000,17 +2994,12 @@ update_compile_order -fileset sim_1
 
 #Create DFX Configurations
 setup_pr_configurations
-create_pr_configuration -name config_7 -partitions { }  -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 opendfx_shell_i/RP_2 ]
-create_run child_0_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_7
 
-launch_runs impl_1 -to_step write_bitstream -jobs 16
+set num_procs [exec nproc]
+launch_runs impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
 exec cp ./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit ./configs/
-# launch_runs child_0_impl_1 child_1_impl_1 child_2_impl_1 -to_step write_bitstream -jobs 16
-# wait_on_run child_0_impl_1
-# wait_on_run child_1_impl_1
-# wait_on_run child_2_impl_1
 open_run impl_1
 write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
 write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./create_new_rm/abstract_shells/abstract_shell_RP_1.dcp
