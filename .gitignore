@@ -8,6 +8,7 @@ create_new_rm/*
 !create_new_rm/abstract_shells/
 !create_new_rm/generate_rm.tcl
 !create_new_rm/hw_prj.tcl
+!create_new_rm/main.tcl
 
 **/project*/
 **/.Xil/
