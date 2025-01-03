@@ -2962,7 +2962,7 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x81000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_0/rm_comm_box_0/s_axi_control/reg0] -force
   assign_bd_address -offset 0x83000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_1/rm_comm_box_0/s_axi_control/reg0] -force
   assign_bd_address -offset 0x85000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_2/rm_comm_box_0/s_axi_control/reg0] -force
-  assign_bd_address -offset 0xA0000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs static_shell/dfx_slot_manager/siha_manager_0/s_axi/reg0] -force
+  assign_bd_address -offset 0xA0100000 -range 0x00010000 -target_address_space [get_bd_addr_spaces static_shell/zynq_ultra_ps_e_0/Data] [get_bd_addr_segs static_shell/dfx_slot_manager/siha_manager_0/s_axi/reg0] -force
 
 
   # Restore current instance
