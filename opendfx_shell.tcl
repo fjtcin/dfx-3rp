@@ -42,7 +42,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following
 # block design container source references:
-# ADDSUB
+# ADDSUB, MULDVD
 
 # Please add the sources before sourcing this Tcl script.
 
@@ -61,8 +61,10 @@ if { $list_projs eq "" } {
 }
 
 source ./rm_tcl/add_sub.tcl
+source ./rm_tcl/mul_dvd.tcl
 
 cr_bd_ADDSUB "" ADDSUB
+cr_bd_MULDVD "" MULDVD
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -176,7 +178,7 @@ xilinx.com:ip:util_vector_logic:2.0\
 ##################################################################
 set bCheckSources 1
 set list_bdc_active "ADDSUB"
-set list_bdc_dfx ""
+set list_bdc_dfx "MULDVD"
 
 array set map_bdc_missing {}
 set map_bdc_missing(ACTIVE) ""
@@ -186,6 +188,7 @@ set map_bdc_missing(BDC) ""
 if { $bCheckSources == 1 } {
    set list_check_srcs "\
 ADDSUB \
+MULDVD \
 "
 
    common::send_gid_msg -ssname BD::TCL -id 2056 -severity "INFO" "Checking if the following sources for block design container exist in the project: $list_check_srcs .\n\n"
@@ -2879,8 +2882,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd:MULDVD.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:MULDVD.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_0
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_0/M_AXI_GMEM]
@@ -2892,8 +2895,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd:MULDVD.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:MULDVD.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_1
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_1/M_AXI_GMEM]
@@ -2905,8 +2908,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {ADDSUB.bd} \
    CONFIG.ACTIVE_SYNTH_BD {ADDSUB.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {ADDSUB.bd} \
-   CONFIG.LIST_SYNTH_BD {ADDSUB.bd} \
+   CONFIG.LIST_SIM_BD {ADDSUB.bd:MULDVD.bd} \
+   CONFIG.LIST_SYNTH_BD {ADDSUB.bd:MULDVD.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_2
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
@@ -2999,8 +3002,10 @@ set num_procs [exec nproc]
 launch_runs impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
-exec cp ./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit ./configs/
-open_run impl_1
-write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./create_new_rm/abstract_shells/abstract_shell_RP_1.dcp
-write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./create_new_rm/abstract_shells/abstract_shell_RP_2.dcp
+# exec cp ./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit ./configs/
+launch_runs child_1_impl_1 -to_step write_bitstream -jobs 16
+wait_on_run child_1_impl_1
+# open_run impl_1
+# write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
+# write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./create_new_rm/abstract_shells/abstract_shell_RP_1.dcp
+# write_abstract_shell -force -cell opendfx_shell_i/RP_2 ./create_new_rm/abstract_shells/abstract_shell_RP_2.dcp

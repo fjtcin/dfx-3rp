@@ -10,6 +10,8 @@ create_new_rm/*
 !create_new_rm/hw_prj.tcl
 !create_new_rm/main.tcl
 
+configs/*/
+
 **/project*/
 **/.Xil/
 **/hd_visual/

@@ -11,3 +11,9 @@ git clean -dfX
 ```bash
 vivado -mode batch -notrace -source ./opendfx_shell.tcl
 ```
+
+## copy RMs
+
+```bash
+python finalize.py
+```
