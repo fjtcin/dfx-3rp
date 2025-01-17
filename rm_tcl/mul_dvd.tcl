@@ -15,7 +15,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\
 user.org:user:AccelConfig:1.0\
-xilinx.com:hls:muldvd:1.0\
+xilinx.com:hls:mul_dvd:1.0\
 xilinx.com:ip:proc_sys_reset:5.0\
 user.org:user:rm_comm_box:1.0\
 xilinx.com:ip:smartconnect:1.0\
@@ -142,8 +142,8 @@ if { $bCheckIPsPassed != 1 } {
    CONFIG.TID1_OUTPUT {2} \
  ] $AccelConfig_0
 
-  # Create instance: muldvd_0, and set properties
-  set muldvd_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:muldvd:1.0 muldvd_0 ]
+  # Create instance: mul_dvd_0, and set properties
+  set mul_dvd_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:mul_dvd:1.0 mul_dvd_0 ]
 
   # Create instance: proc_sys_reset_0, and set properties
   set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
@@ -171,25 +171,25 @@ if { $bCheckIPsPassed != 1 } {
  ] $xlconstant_1
 
   # Create interface connections
-  connect_bd_intf_net -intf_net AccelConfig_0_tid0_axis [get_bd_intf_pins AccelConfig_0/tid0_axis] [get_bd_intf_pins muldvd_0/in1]
-  connect_bd_intf_net -intf_net AccelConfig_0_tid2_axis [get_bd_intf_pins AccelConfig_0/tid2_axis] [get_bd_intf_pins muldvd_0/in2]
+  connect_bd_intf_net -intf_net AccelConfig_0_tid0_axis [get_bd_intf_pins AccelConfig_0/tid0_axis] [get_bd_intf_pins mul_dvd_0/in1]
+  connect_bd_intf_net -intf_net AccelConfig_0_tid2_axis [get_bd_intf_pins AccelConfig_0/tid2_axis] [get_bd_intf_pins mul_dvd_0/in2]
   connect_bd_intf_net -intf_net S_AXI_CTRL_1 [get_bd_intf_ports S_AXI_CTRL] [get_bd_intf_pins smartconnect_0/S00_AXI]
-  connect_bd_intf_net -intf_net muldvd_0_out_r [get_bd_intf_pins muldvd_0/out_r] [get_bd_intf_pins rm_comm_box_0/s2mm_axis]
+  connect_bd_intf_net -intf_net mul_dvd_0_out_r [get_bd_intf_pins mul_dvd_0/out_r] [get_bd_intf_pins rm_comm_box_0/s2mm_axis]
   connect_bd_intf_net -intf_net rm_comm_box_0_m_axi_gmem [get_bd_intf_ports M_AXI_GMEM] [get_bd_intf_pins rm_comm_box_0/m_axi_gmem]
   connect_bd_intf_net -intf_net rm_comm_box_0_mm2s_axis [get_bd_intf_pins AccelConfig_0/axis_in] [get_bd_intf_pins rm_comm_box_0/mm2s_axis]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins AccelConfig_0/s_axi_ctrl] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins rm_comm_box_0/s_axi_control] [get_bd_intf_pins smartconnect_0/M01_AXI]
 
   # Create port connections
-  connect_bd_net -net AccelConfig_0_ap_start [get_bd_pins AccelConfig_0/ap_start] [get_bd_pins muldvd_0/ap_start]
+  connect_bd_net -net AccelConfig_0_ap_start [get_bd_pins AccelConfig_0/ap_start] [get_bd_pins mul_dvd_0/ap_start]
   connect_bd_net -net AccelConfig_0_interrupt [get_bd_pins AccelConfig_0/interrupt] [get_bd_pins xlconcat_0/In0]
-  connect_bd_net -net AccelConfig_0_scalar1 [get_bd_pins AccelConfig_0/scalar1] [get_bd_pins muldvd_0/opcode]
-  connect_bd_net -net clk_1 [get_bd_ports clk] [get_bd_pins AccelConfig_0/clk] [get_bd_pins muldvd_0/ap_clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rm_comm_box_0/clk] [get_bd_pins smartconnect_0/aclk]
-  connect_bd_net -net muldvd_0_ap_done [get_bd_pins AccelConfig_0/ap_done] [get_bd_pins muldvd_0/ap_done]
-  connect_bd_net -net muldvd_0_ap_idle [get_bd_pins AccelConfig_0/ap_idle] [get_bd_pins muldvd_0/ap_idle]
-  connect_bd_net -net muldvd_0_ap_ready [get_bd_pins AccelConfig_0/ap_ready] [get_bd_pins muldvd_0/ap_ready]
+  connect_bd_net -net AccelConfig_0_scalar1 [get_bd_pins AccelConfig_0/scalar1] [get_bd_pins mul_dvd_0/opcode]
+  connect_bd_net -net clk_1 [get_bd_ports clk] [get_bd_pins AccelConfig_0/clk] [get_bd_pins mul_dvd_0/ap_clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rm_comm_box_0/clk] [get_bd_pins smartconnect_0/aclk]
+  connect_bd_net -net mul_dvd_0_ap_done [get_bd_pins AccelConfig_0/ap_done] [get_bd_pins mul_dvd_0/ap_done]
+  connect_bd_net -net mul_dvd_0_ap_idle [get_bd_pins AccelConfig_0/ap_idle] [get_bd_pins mul_dvd_0/ap_idle]
+  connect_bd_net -net mul_dvd_0_ap_ready [get_bd_pins AccelConfig_0/ap_ready] [get_bd_pins mul_dvd_0/ap_ready]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins AccelConfig_0/resetn] [get_bd_pins muldvd_0/ap_rst_n] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rm_comm_box_0/resetn]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins AccelConfig_0/resetn] [get_bd_pins mul_dvd_0/ap_rst_n] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rm_comm_box_0/resetn]
   connect_bd_net -net resetn_1 [get_bd_ports resetn] [get_bd_pins proc_sys_reset_0/ext_reset_in]
   connect_bd_net -net rm_comm_box_0_interrupt_mm2s [get_bd_pins rm_comm_box_0/interrupt_mm2s] [get_bd_pins xlconcat_0/In2]
   connect_bd_net -net rm_comm_box_0_interrupt_s2mm [get_bd_pins rm_comm_box_0/interrupt_s2mm] [get_bd_pins xlconcat_0/In1]

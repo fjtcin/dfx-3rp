@@ -24,7 +24,7 @@ RM_DTSI = """/dts-v1/;
 / {
 	fragment@0 {
 		target = <&fpga_PR$RPNUM>;
-    	__overlay__ {
+		__overlay__ {
 			firmware-name = "opendfx_shell_i_RP_$RPNUM_$RMNAME_inst_$RPNUM_partial.bit.bin";
 			partial-fpga-config;
 		};
