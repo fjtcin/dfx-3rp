@@ -25,7 +25,7 @@ RM_DTSI = """/dts-v1/;
 	fragment@0 {
 		target = <&fpga_PR$RPNUM>;
 		__overlay__ {
-			firmware-name = "opendfx_shell_i_RP_$RPNUM_$RMNAME_inst_$RPNUM_partial.bit.bin";
+			firmware-name = "opendfx_shell_i_RP_$RPNUM_$RMNAME_inst_$RMNUM_partial.bit.bin";
 			partial-fpga-config;
 		};
 	};
@@ -45,17 +45,20 @@ shutil.copy("./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit", "./co
 
 modules = [
     ("ADDSUB", "impl_1", (True, True, True)),
-    ("MULDVD", "child_1_impl_1", (True, True, True))
+    ("MULDVD", "child_1_impl_1", (True, True, True)),
+    ("GEMM", "child_2_impl_1", (False, False, True))
 ]
 
 for module in modules:
     name, impl, mask = module
     Path(f"./configs/{name}/").mkdir(exist_ok=True)
 
+    rm_num = 0
     for i in range(3):
         if not mask[i]: continue
         p = Path(f"./configs/{name}/{name}_slot{i}")
         p.mkdir(exist_ok=True)
-        shutil.copy(f"./project_1/project_1.runs/{impl}/opendfx_shell_i_RP_{i}_{name}_inst_{i}_partial.bit", p)
+        shutil.copy(f"./project_1/project_1.runs/{impl}/opendfx_shell_i_RP_{i}_{name}_inst_{rm_num}_partial.bit", p)
         with open(p / "accel.json", "w") as f: f.write(accel_json_dict.get(i))
-        with open(p / f"opendfx_shell_i_RP_{i}_{name}_inst_{i}_partial.dtsi", "w") as f: f.write(RM_DTSI.replace("$RPNUM", str(i)).replace("$RMNAME", name))
+        with open(p / f"opendfx_shell_i_RP_{i}_{name}_inst_{rm_num}_partial.dtsi", "w") as f: f.write(RM_DTSI.replace("$RPNUM", str(i)).replace("$RMNAME", name).replace("$RMNUM", str(rm_num)))
+        rm_num += 1
