@@ -42,7 +42,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following
 # block design container source references:
-# TWICE, GEMM
+# TWICE, FOUR, GEMM
 
 # Please add the sources before sourcing this Tcl script.
 
@@ -61,9 +61,11 @@ if { $list_projs eq "" } {
 }
 
 source ./rm_tcl/twice.tcl
+source ./rm_tcl/four_times.tcl
 source ./rm_tcl/gemm.tcl
 
 cr_bd_TWICE "" TWICE
+cr_bd_FOUR "" FOUR
 cr_bd_GEMM "" GEMM
 
 # CHANGE DESIGN NAME HERE
@@ -178,7 +180,7 @@ xilinx.com:ip:util_vector_logic:2.0\
 ##################################################################
 set bCheckSources 1
 set list_bdc_active "TWICE"
-set list_bdc_dfx "GEMM"
+set list_bdc_dfx "FOUR, GEMM"
 
 array set map_bdc_missing {}
 set map_bdc_missing(ACTIVE) ""
@@ -188,6 +190,7 @@ set map_bdc_missing(BDC) ""
 if { $bCheckSources == 1 } {
    set list_check_srcs "\
 TWICE \
+FOUR \
 GEMM \
 "
 
@@ -2882,8 +2885,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd} \
+   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_0
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_0/M_AXI_GMEM]
@@ -2895,8 +2898,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd} \
+   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_1
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_1/M_AXI_GMEM]
@@ -2908,8 +2911,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd:GEMM.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd:GEMM.bd} \
+   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd:GEMM.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd:GEMM.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_2
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x2_0000_0000 1G} {0x2_8000_0000 1G} {0x3_0000_0000 1G} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
@@ -2999,16 +3002,17 @@ update_compile_order -fileset sim_1
 # setup_pr_configurations
 create_pr_configuration -name config_1 -partitions [list opendfx_shell_i/RP_0:TWICE_inst_0 opendfx_shell_i/RP_1:TWICE_inst_1 opendfx_shell_i/RP_2:TWICE_inst_2 ]
 set_property PR_CONFIGURATION config_1 [get_runs impl_1]
-create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_2:GEMM_inst_0 ] -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 ]
+create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_0:FOUR_inst_0 opendfx_shell_i/RP_1:FOUR_inst_1 opendfx_shell_i/RP_2:FOUR_inst_2 ]
 create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
+create_pr_configuration -name config_3 -partitions [list opendfx_shell_i/RP_2:GEMM_inst_0 ] -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 ]
+create_run child_2_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_3
 
 set num_procs [exec nproc]
 launch_runs impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
-# exec cp ./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit ./configs/
-# launch_runs child_1_impl_1 child_2_impl_1 -to_step write_bitstream -jobs $num_procs
-# wait_on_run child_1_impl_1
+launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
+wait_on_run child_1_impl_1
 # wait_on_run child_2_impl_1
 # open_run impl_1
 # write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp

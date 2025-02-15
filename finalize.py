@@ -44,7 +44,8 @@ accel_json_dict = {
 shutil.copy("./project_1/project_1.runs/impl_1/opendfx_shell_wrapper.bit", "./configs/")
 
 modules = [
-    ("TWICE", "impl_1", (True, True, True))
+    ("TWICE", "impl_1", (True, True, True)),
+    ("FOUR", "child_1_impl_1", (True, True, True))
 ]
 
 for module in modules:
