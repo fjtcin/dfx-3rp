@@ -42,7 +42,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following
 # block design container source references:
-# TWICE, FOUR
+# TWICE0, TWICE1, TWICE2
 
 # Please add the sources before sourcing this Tcl script.
 
@@ -60,11 +60,13 @@ if { $list_projs eq "" } {
    set_property board_part xilinx.com:k26c:part0:1.3 [current_project]
 }
 
-source ./rm_tcl/twice.tcl
-source ./rm_tcl/four_times.tcl
+source ./rm_tcl/twice_0.tcl
+source ./rm_tcl/twice_1.tcl
+source ./rm_tcl/twice_2.tcl
 
-cr_bd_TWICE "" TWICE
-cr_bd_FOUR "" FOUR
+cr_bd_TWICE0 "" TWICE0
+cr_bd_TWICE1 "" TWICE1
+cr_bd_TWICE2 "" TWICE2
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -142,6 +144,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\
+xilinx.com:ip:axis_clock_converter:1.1\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:zynq_ultra_ps_e:3.4\
@@ -176,8 +179,8 @@ xilinx.com:ip:util_vector_logic:2.0\
 # CHECK Block Design Container Sources
 ##################################################################
 set bCheckSources 1
-set list_bdc_active "TWICE"
-set list_bdc_dfx "FOUR"
+set list_bdc_active "TWICE0, TWICE1, TWICE2"
+set list_bdc_dfx ""
 
 array set map_bdc_missing {}
 set map_bdc_missing(ACTIVE) ""
@@ -186,8 +189,9 @@ set map_bdc_missing(BDC) ""
 
 if { $bCheckSources == 1 } {
    set list_check_srcs "\
-TWICE \
-FOUR \
+TWICE0 \
+TWICE1 \
+TWICE2 \
 "
 
    common::send_gid_msg -ssname BD::TCL -id 2056 -severity "INFO" "Checking if the following sources for block design container exist in the project: $list_check_srcs .\n\n"
@@ -2802,51 +2806,56 @@ proc create_root_design { parentCell } {
   # Create ports
 
   # Create instance: RP_0, and set properties
-  set RP_0 [ create_bd_cell -type container -reference TWICE RP_0 ]
+  set RP_0 [ create_bd_cell -type container -reference TWICE0 RP_0 ]
   set_property -dict [ list \
-   CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
-   CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
+   CONFIG.ACTIVE_SIM_BD {TWICE0.bd} \
+   CONFIG.ACTIVE_SYNTH_BD {TWICE0.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd} \
+   CONFIG.LIST_SIM_BD {TWICE0.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE0.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_0
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_0/M_AXI_GMEM]
   set_property APERTURES {{0x8000_0000 32M}} [get_bd_intf_pins /RP_0/S_AXI_CTRL]
 
   # Create instance: RP_1, and set properties
-  set RP_1 [ create_bd_cell -type container -reference TWICE RP_1 ]
+  set RP_1 [ create_bd_cell -type container -reference TWICE1 RP_1 ]
   set_property -dict [ list \
-   CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
-   CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
+   CONFIG.ACTIVE_SIM_BD {TWICE1.bd} \
+   CONFIG.ACTIVE_SYNTH_BD {TWICE1.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd} \
+   CONFIG.LIST_SIM_BD {TWICE1.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE1.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_1
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_1/M_AXI_GMEM]
   set_property APERTURES {{0x8200_0000 32M}} [get_bd_intf_pins /RP_1/S_AXI_CTRL]
 
   # Create instance: RP_2, and set properties
-  set RP_2 [ create_bd_cell -type container -reference TWICE RP_2 ]
+  set RP_2 [ create_bd_cell -type container -reference TWICE2 RP_2 ]
   set_property -dict [ list \
-   CONFIG.ACTIVE_SIM_BD {TWICE.bd} \
-   CONFIG.ACTIVE_SYNTH_BD {TWICE.bd} \
+   CONFIG.ACTIVE_SIM_BD {TWICE2.bd} \
+   CONFIG.ACTIVE_SYNTH_BD {TWICE2.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE.bd:FOUR.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE.bd:FOUR.bd} \
+   CONFIG.LIST_SIM_BD {TWICE2.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE2.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_2
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
   set_property APERTURES {{0x8400_0000 32M}} [get_bd_intf_pins /RP_2/S_AXI_CTRL]
 
+  # Create instance: axis_clock_converter_0, and set properties
+  set axis_clock_converter_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_clock_converter:1.1 axis_clock_converter_0 ]
+
   # Create instance: static_shell
   create_hier_cell_static_shell [current_bd_instance .] static_shell
 
   # Create interface connections
+  connect_bd_intf_net -intf_net RP_0_AXIS_OUT [get_bd_intf_pins RP_0/AXIS_OUT] [get_bd_intf_pins axis_clock_converter_0/S_AXIS]
   connect_bd_intf_net -intf_net RP_2_M_AXI_GMEM [get_bd_intf_pins RP_2/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp2_data]
   connect_bd_intf_net -intf_net S_AXI_CTRL_1 [get_bd_intf_pins RP_1/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp1_config]
   connect_bd_intf_net -intf_net S_AXI_CTRL_5 [get_bd_intf_pins RP_0/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp0_config]
+  connect_bd_intf_net -intf_net axis_clock_converter_0_M_AXIS [get_bd_intf_pins RP_1/AXIS_IN] [get_bd_intf_pins axis_clock_converter_0/M_AXIS]
   connect_bd_intf_net -intf_net rm_comm_box_0_m_axi_gmem [get_bd_intf_pins RP_0/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp0_data]
   connect_bd_intf_net -intf_net rp1_data_1 [get_bd_intf_pins RP_1/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp1_data]
   connect_bd_intf_net -intf_net static_shell_rp2_config [get_bd_intf_pins RP_2/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp2_config]
@@ -2855,10 +2864,10 @@ proc create_root_design { parentCell } {
   connect_bd_net -net AccelConfig_0_interrupt [get_bd_pins RP_0/interrupt] [get_bd_pins static_shell/rp0_interrupt]
   connect_bd_net -net RP_1_interrupt [get_bd_pins RP_1/interrupt] [get_bd_pins static_shell/rp1_interrupt]
   connect_bd_net -net RP_2_interrupt [get_bd_pins RP_2/interrupt] [get_bd_pins static_shell/rp2_interrupt]
-  connect_bd_net -net clk_1 [get_bd_pins RP_1/clk] [get_bd_pins static_shell/rp1_clk]
-  connect_bd_net -net clk_2 [get_bd_pins RP_0/clk] [get_bd_pins static_shell/rp0_clk]
-  connect_bd_net -net resetn_1 [get_bd_pins RP_1/resetn] [get_bd_pins static_shell/rp1_resetn]
-  connect_bd_net -net static_shell_rp0_resetn [get_bd_pins RP_0/resetn] [get_bd_pins static_shell/rp0_resetn]
+  connect_bd_net -net clk_1 [get_bd_pins RP_1/clk] [get_bd_pins axis_clock_converter_0/m_axis_aclk] [get_bd_pins static_shell/rp1_clk]
+  connect_bd_net -net clk_2 [get_bd_pins RP_0/clk] [get_bd_pins axis_clock_converter_0/s_axis_aclk] [get_bd_pins static_shell/rp0_clk]
+  connect_bd_net -net resetn_1 [get_bd_pins RP_1/resetn] [get_bd_pins axis_clock_converter_0/m_axis_aresetn] [get_bd_pins static_shell/rp1_resetn]
+  connect_bd_net -net static_shell_rp0_resetn [get_bd_pins RP_0/resetn] [get_bd_pins axis_clock_converter_0/s_axis_aresetn] [get_bd_pins static_shell/rp0_resetn]
   connect_bd_net -net static_shell_rp2_clk [get_bd_pins RP_2/clk] [get_bd_pins static_shell/rp2_clk]
   connect_bd_net -net static_shell_rp2_resetn [get_bd_pins RP_2/resetn] [get_bd_pins static_shell/rp2_resetn]
 
@@ -2913,17 +2922,17 @@ update_compile_order -fileset sim_1
 
 #Create DFX Configurations
 # setup_pr_configurations
-create_pr_configuration -name config_1 -partitions [list opendfx_shell_i/RP_0:TWICE_inst_0 opendfx_shell_i/RP_1:TWICE_inst_1 opendfx_shell_i/RP_2:TWICE_inst_2 ]
+create_pr_configuration -name config_1 -partitions [list opendfx_shell_i/RP_0:TWICE0_inst_0 opendfx_shell_i/RP_1:TWICE1_inst_0 opendfx_shell_i/RP_2:TWICE2_inst_0 ]
 set_property PR_CONFIGURATION config_1 [get_runs impl_1]
-create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_0:FOUR_inst_0 opendfx_shell_i/RP_1:FOUR_inst_1 opendfx_shell_i/RP_2:FOUR_inst_2 ]
-create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
+# create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_0:FOUR_inst_0 opendfx_shell_i/RP_1:FOUR_inst_1 opendfx_shell_i/RP_2:FOUR_inst_2 ]
+# create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
 
 set num_procs [exec nproc]
 launch_runs impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
-launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
-wait_on_run child_1_impl_1
+# launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
+# wait_on_run child_1_impl_1
 # wait_on_run child_2_impl_1
 # open_run impl_1
 # write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
