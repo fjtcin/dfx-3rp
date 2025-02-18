@@ -1,7 +1,7 @@
 # Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 create_pblock pblock_static
-add_cells_to_pblock [get_pblocks pblock_static] [get_cells -quiet [list opendfx_shell_i/static_shell opendfx_shell_i/axis_clock_converter_0]]
+add_cells_to_pblock [get_pblocks pblock_static] [get_cells -quiet [list opendfx_shell_i/static_shell opendfx_shell_i/axis_data_fifo_0]]
 resize_pblock [get_pblocks pblock_static] -add {PS8_X0Y0:PS8_X0Y0}
 resize_pblock [get_pblocks pblock_static] -add {VCU_X0Y0:VCU_X0Y0}
 resize_pblock pblock_static -add {SLICE_X0Y0:SLICE_X16Y239}

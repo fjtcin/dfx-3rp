@@ -144,7 +144,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\
-xilinx.com:ip:axis_clock_converter:1.1\
+xilinx.com:ip:axis_data_fifo:2.0\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:zynq_ultra_ps_e:3.4\
@@ -2844,18 +2844,22 @@ proc create_root_design { parentCell } {
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
   set_property APERTURES {{0x8400_0000 32M}} [get_bd_intf_pins /RP_2/S_AXI_CTRL]
 
-  # Create instance: axis_clock_converter_0, and set properties
-  set axis_clock_converter_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_clock_converter:1.1 axis_clock_converter_0 ]
+  # Create instance: axis_data_fifo_0, and set properties
+  set axis_data_fifo_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_data_fifo:2.0 axis_data_fifo_0 ]
+  set_property -dict [ list \
+   CONFIG.FIFO_DEPTH {64} \
+   CONFIG.IS_ACLK_ASYNC {1} \
+ ] $axis_data_fifo_0
 
   # Create instance: static_shell
   create_hier_cell_static_shell [current_bd_instance .] static_shell
 
   # Create interface connections
-  connect_bd_intf_net -intf_net RP_0_AXIS_OUT [get_bd_intf_pins RP_0/AXIS_OUT] [get_bd_intf_pins axis_clock_converter_0/S_AXIS]
+  connect_bd_intf_net -intf_net RP_0_AXIS_OUT [get_bd_intf_pins RP_0/AXIS_OUT] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
   connect_bd_intf_net -intf_net RP_2_M_AXI_GMEM [get_bd_intf_pins RP_2/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp2_data]
   connect_bd_intf_net -intf_net S_AXI_CTRL_1 [get_bd_intf_pins RP_1/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp1_config]
   connect_bd_intf_net -intf_net S_AXI_CTRL_5 [get_bd_intf_pins RP_0/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp0_config]
-  connect_bd_intf_net -intf_net axis_clock_converter_0_M_AXIS [get_bd_intf_pins RP_1/AXIS_IN] [get_bd_intf_pins axis_clock_converter_0/M_AXIS]
+  connect_bd_intf_net -intf_net axis_data_fifo_0_M_AXIS [get_bd_intf_pins RP_1/AXIS_IN] [get_bd_intf_pins axis_data_fifo_0/M_AXIS]
   connect_bd_intf_net -intf_net rm_comm_box_0_m_axi_gmem [get_bd_intf_pins RP_0/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp0_data]
   connect_bd_intf_net -intf_net rp1_data_1 [get_bd_intf_pins RP_1/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp1_data]
   connect_bd_intf_net -intf_net static_shell_rp2_config [get_bd_intf_pins RP_2/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp2_config]
@@ -2864,10 +2868,10 @@ proc create_root_design { parentCell } {
   connect_bd_net -net AccelConfig_0_interrupt [get_bd_pins RP_0/interrupt] [get_bd_pins static_shell/rp0_interrupt]
   connect_bd_net -net RP_1_interrupt [get_bd_pins RP_1/interrupt] [get_bd_pins static_shell/rp1_interrupt]
   connect_bd_net -net RP_2_interrupt [get_bd_pins RP_2/interrupt] [get_bd_pins static_shell/rp2_interrupt]
-  connect_bd_net -net clk_1 [get_bd_pins RP_1/clk] [get_bd_pins axis_clock_converter_0/m_axis_aclk] [get_bd_pins static_shell/rp1_clk]
-  connect_bd_net -net clk_2 [get_bd_pins RP_0/clk] [get_bd_pins axis_clock_converter_0/s_axis_aclk] [get_bd_pins static_shell/rp0_clk]
-  connect_bd_net -net resetn_1 [get_bd_pins RP_1/resetn] [get_bd_pins axis_clock_converter_0/m_axis_aresetn] [get_bd_pins static_shell/rp1_resetn]
-  connect_bd_net -net static_shell_rp0_resetn [get_bd_pins RP_0/resetn] [get_bd_pins axis_clock_converter_0/s_axis_aresetn] [get_bd_pins static_shell/rp0_resetn]
+  connect_bd_net -net clk_1 [get_bd_pins RP_1/clk] [get_bd_pins axis_data_fifo_0/m_axis_aclk] [get_bd_pins static_shell/rp1_clk]
+  connect_bd_net -net clk_2 [get_bd_pins RP_0/clk] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins static_shell/rp0_clk]
+  connect_bd_net -net resetn_1 [get_bd_pins RP_1/resetn] [get_bd_pins static_shell/rp1_resetn]
+  connect_bd_net -net static_shell_rp0_resetn [get_bd_pins RP_0/resetn] [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins static_shell/rp0_resetn]
   connect_bd_net -net static_shell_rp2_clk [get_bd_pins RP_2/clk] [get_bd_pins static_shell/rp2_clk]
   connect_bd_net -net static_shell_rp2_resetn [get_bd_pins RP_2/resetn] [get_bd_pins static_shell/rp2_resetn]
 
