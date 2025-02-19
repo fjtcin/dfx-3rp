@@ -79,7 +79,7 @@ if { $bCheckIPsPassed != 1 } {
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {49} \
    CONFIG.DATA_WIDTH {128} \
-   CONFIG.FREQ_HZ {99999001} \
+   CONFIG.FREQ_HZ {177776001} \
    CONFIG.NUM_READ_OUTSTANDING {2} \
    CONFIG.NUM_WRITE_OUTSTANDING {2} \
    CONFIG.PROTOCOL {AXI4} \
@@ -92,7 +92,7 @@ if { $bCheckIPsPassed != 1 } {
    CONFIG.AWUSER_WIDTH {0} \
    CONFIG.BUSER_WIDTH {0} \
    CONFIG.DATA_WIDTH {32} \
-   CONFIG.FREQ_HZ {99999001} \
+   CONFIG.FREQ_HZ {177776001} \
    CONFIG.HAS_BRESP {1} \
    CONFIG.HAS_BURST {0} \
    CONFIG.HAS_CACHE {0} \
@@ -120,7 +120,7 @@ if { $bCheckIPsPassed != 1 } {
 
 
   # Create ports
-  set clk [ create_bd_port -dir I -type clk -freq_hz 99999001 clk ]
+  set clk [ create_bd_port -dir I -type clk -freq_hz 177776001 clk ]
   set_property -dict [ list \
    CONFIG.ASSOCIATED_BUSIF {M_AXI_GMEM:S_AXI_CTRL} \
  ] $clk
