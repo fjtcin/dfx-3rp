@@ -52,7 +52,7 @@
 			};
 			clocking1: clocking1 {
 				#clock-cells = <0>;
-				assigned-clock-rates = <249997498>;
+				assigned-clock-rates = <99999001>;
 				assigned-clocks = <&zynqmp_clk 72>;
 				clock-output-names = "fabric_clk";
 				clocks = <&zynqmp_clk 72>;
@@ -60,7 +60,7 @@
 			};
 			clocking2: clocking2 {
 				#clock-cells = <0>;
-				assigned-clock-rates = <249997498>;
+				assigned-clock-rates = <99999001>;
 				assigned-clocks = <&zynqmp_clk 73>;
 				clock-output-names = "fabric_clk";
 				clocks = <&zynqmp_clk 73>;
@@ -68,7 +68,7 @@
 			};
 			clocking3: clocking3 {
 				#clock-cells = <0>;
-				assigned-clock-rates = <249997498>;
+				assigned-clock-rates = <99999001>;
 				assigned-clocks = <&zynqmp_clk 74>;
 				clock-output-names = "fabric_clk";
 				clocks = <&zynqmp_clk 74>;
