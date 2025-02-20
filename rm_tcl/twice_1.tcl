@@ -15,6 +15,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\
 user.org:user:AccelConfig:1.0\
+xilinx.com:hls:mux_3_1:1.0\
 xilinx.com:ip:proc_sys_reset:5.0\
 user.org:user:rm_comm_box:1.0\
 xilinx.com:ip:smartconnect:1.0\
@@ -75,7 +76,7 @@ if { $bCheckIPsPassed != 1 } {
 
 
   # Create interface ports
-  set AXIS_IN [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:axis_rtl:1.0 AXIS_IN ]
+  set AXIS_IN0 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:axis_rtl:1.0 AXIS_IN0 ]
   set_property -dict [ list \
    CONFIG.FREQ_HZ {249997498} \
    CONFIG.HAS_TKEEP {0} \
@@ -87,7 +88,21 @@ if { $bCheckIPsPassed != 1 } {
    CONFIG.TDEST_WIDTH {0} \
    CONFIG.TID_WIDTH {0} \
    CONFIG.TUSER_WIDTH {0} \
-   ] $AXIS_IN
+   ] $AXIS_IN0
+
+  set AXIS_IN2 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:axis_rtl:1.0 AXIS_IN2 ]
+  set_property -dict [ list \
+   CONFIG.FREQ_HZ {249997498} \
+   CONFIG.HAS_TKEEP {0} \
+   CONFIG.HAS_TLAST {0} \
+   CONFIG.HAS_TREADY {1} \
+   CONFIG.HAS_TSTRB {0} \
+   CONFIG.LAYERED_METADATA {undef} \
+   CONFIG.TDATA_NUM_BYTES {16} \
+   CONFIG.TDEST_WIDTH {0} \
+   CONFIG.TID_WIDTH {0} \
+   CONFIG.TUSER_WIDTH {0} \
+   ] $AXIS_IN2
 
   set M_AXI_GMEM [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M_AXI_GMEM ]
   set_property -dict [ list \
@@ -136,7 +151,7 @@ if { $bCheckIPsPassed != 1 } {
   # Create ports
   set clk [ create_bd_port -dir I -type clk -freq_hz 249997498 clk ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {M_AXI_GMEM:S_AXI_CTRL:AXIS_IN} \
+   CONFIG.ASSOCIATED_BUSIF {M_AXI_GMEM:S_AXI_CTRL:AXIS_IN0:AXIS_IN2} \
  ] $clk
   set interrupt [ create_bd_port -dir O -from 3 -to 0 -type intr interrupt ]
   set resetn [ create_bd_port -dir I -type rst resetn ]
@@ -149,7 +164,14 @@ if { $bCheckIPsPassed != 1 } {
   set AccelConfig_0 [ create_bd_cell -type ip -vlnv user.org:user:AccelConfig:1.0 AccelConfig_0 ]
   set_property -dict [ list \
    CONFIG.EN_AP_CTRL_HS {true} \
+   CONFIG.EN_TID1_OUTPUT {true} \
+   CONFIG.NUM_SCALAR_PORTS {1} \
+   CONFIG.SCALAR1_WIDTH {32} \
+   CONFIG.TID1_OUTPUT {2} \
  ] $AccelConfig_0
+
+  # Create instance: mux_3_1_0, and set properties
+  set mux_3_1_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:mux_3_1:1.0 mux_3_1_0 ]
 
   # Create instance: proc_sys_reset_0, and set properties
   set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
@@ -180,8 +202,11 @@ if { $bCheckIPsPassed != 1 } {
  ] $xlconstant_1
 
   # Create interface connections
-  connect_bd_intf_net -intf_net AXIS_IN_1 [get_bd_intf_ports AXIS_IN] [get_bd_intf_pins twice_0/in_r]
+  connect_bd_intf_net -intf_net AXIS_IN0_1 [get_bd_intf_ports AXIS_IN0] [get_bd_intf_pins mux_3_1_0/in1]
+  connect_bd_intf_net -intf_net AXIS_IN2_1 [get_bd_intf_ports AXIS_IN2] [get_bd_intf_pins mux_3_1_0/in2]
+  connect_bd_intf_net -intf_net AccelConfig_0_tid0_axis [get_bd_intf_pins AccelConfig_0/tid0_axis] [get_bd_intf_pins mux_3_1_0/in0]
   connect_bd_intf_net -intf_net S_AXI_CTRL_1 [get_bd_intf_ports S_AXI_CTRL] [get_bd_intf_pins smartconnect_0/S00_AXI]
+  connect_bd_intf_net -intf_net mux_3_1_0_out_r [get_bd_intf_pins mux_3_1_0/out_r] [get_bd_intf_pins twice_0/in_r]
   connect_bd_intf_net -intf_net rm_comm_box_0_m_axi_gmem [get_bd_intf_ports M_AXI_GMEM] [get_bd_intf_pins rm_comm_box_0/m_axi_gmem]
   connect_bd_intf_net -intf_net rm_comm_box_0_mm2s_axis [get_bd_intf_pins AccelConfig_0/axis_in] [get_bd_intf_pins rm_comm_box_0/mm2s_axis]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins AccelConfig_0/s_axi_ctrl] [get_bd_intf_pins smartconnect_0/M00_AXI]
@@ -191,9 +216,10 @@ if { $bCheckIPsPassed != 1 } {
   # Create port connections
   connect_bd_net -net AccelConfig_0_ap_start [get_bd_pins AccelConfig_0/ap_start] [get_bd_pins twice_0/ap_start]
   connect_bd_net -net AccelConfig_0_interrupt [get_bd_pins AccelConfig_0/interrupt] [get_bd_pins xlconcat_0/In0]
-  connect_bd_net -net clk_1 [get_bd_ports clk] [get_bd_pins AccelConfig_0/clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rm_comm_box_0/clk] [get_bd_pins smartconnect_0/aclk] [get_bd_pins twice_0/ap_clk]
+  connect_bd_net -net AccelConfig_0_scalar1 [get_bd_pins AccelConfig_0/scalar1] [get_bd_pins mux_3_1_0/opcode]
+  connect_bd_net -net clk_1 [get_bd_ports clk] [get_bd_pins AccelConfig_0/clk] [get_bd_pins mux_3_1_0/ap_clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rm_comm_box_0/clk] [get_bd_pins smartconnect_0/aclk] [get_bd_pins twice_0/ap_clk]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins AccelConfig_0/resetn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rm_comm_box_0/resetn] [get_bd_pins twice_0/ap_rst_n]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins AccelConfig_0/resetn] [get_bd_pins mux_3_1_0/ap_rst_n] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rm_comm_box_0/resetn] [get_bd_pins twice_0/ap_rst_n]
   connect_bd_net -net resetn_1 [get_bd_ports resetn] [get_bd_pins proc_sys_reset_0/ext_reset_in]
   connect_bd_net -net rm_comm_box_0_interrupt_mm2s [get_bd_pins rm_comm_box_0/interrupt_mm2s] [get_bd_pins xlconcat_0/In2]
   connect_bd_net -net rm_comm_box_0_interrupt_s2mm [get_bd_pins rm_comm_box_0/interrupt_s2mm] [get_bd_pins xlconcat_0/In1]

@@ -12,8 +12,10 @@
 
 #define MUX0_OFFSET			0
 #define MUX1_OFFSET         4
+#define MUX2_OFFSET         8
 #define MUX0_OFFSET_MEM		0x0
 #define MUX1_OFFSET_MEM     0x10
+#define MUX2_OFFSET_MEM     0x20
 
 #define A_OFFSET			64
 #define RESULT_OFFSET		128
@@ -39,8 +41,9 @@ int DataFromAccel(int slot, uint64_t data, uint64_t size);
 int DataToAccelDone(int slot);
 int DataFromAccelDone(int slot);
 
-uint32_t Mux0 = 1;
-uint32_t Mux1 = 1;
+uint32_t Mux0 = 2;
+uint32_t Mux1 = 2;
+uint32_t Mux2 = 3;
 
 // A Input Buffer
 float A[] = {
@@ -54,6 +57,7 @@ float C[16];
 int main(void) {
 	int slot0 = 0;
 	int slot1 = 1;
+	int slot2 = 2;
 	//Initialize and memory map RMs
 	if (InitializeMapRMs(slot0) == -1) {
 		printf("- Check the slot number where the accelerator is loaded and run the test on the specific slot.\n");
@@ -65,6 +69,11 @@ int main(void) {
 		return 0;
 	}
 	StartAccel(slot1);
+	if (InitializeMapRMs(slot2) == -1) {
+		printf("- Check the slot number where the accelerator is loaded and run the test on the specific slot.\n");
+		return 0;
+	}
+	StartAccel(slot2);
 
 	//Allocate XRT buffer to be used for input and output of the application
 	auto device = xrt::device(0);
@@ -74,6 +83,7 @@ int main(void) {
 
 	memcpy(vptr+MUX0_OFFSET, &Mux0, sizeof(Mux0));
 	memcpy(vptr+MUX1_OFFSET, &Mux1, sizeof(Mux1));
+	memcpy(vptr+MUX2_OFFSET, &Mux2, sizeof(Mux2));
 	memcpy(vptr+A_OFFSET, A, sizeof(A));
 
 	DataToAccel(slot0, MUX0_OFFSET_MEM, 1, TID_1);
@@ -81,6 +91,9 @@ int main(void) {
 
 	DataToAccel(slot1, MUX1_OFFSET_MEM, 1, TID_1);
 	if (!DataToAccelDone(slot1)) die("DataToAccelDone(%d)", slot1);
+
+	DataToAccel(slot2, MUX2_OFFSET_MEM, 1, TID_1);
+	if (!DataToAccelDone(slot2)) die("DataToAccelDone(%d)", slot2);
 
 	DataToAccel(slot0, A_OFFSET_MEM, INPUT_SIZE, TID_0);
 	if (!DataToAccelDone(slot0)) die("DataToAccelDone(%d)", slot0);
