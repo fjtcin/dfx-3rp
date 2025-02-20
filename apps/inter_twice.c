@@ -10,13 +10,23 @@
 
 #define SIZE_IN_BYTES       0x4000000	//64MB
 
+#define MUX_OFFSET			0
+#define MUX_OFFSET_MEM		0x0
 
-#define A_OFFSET			0
+#define A_OFFSET			64
 #define RESULT_OFFSET		128
-#define A_OFFSET_MEM		0x0
+#define A_OFFSET_MEM		0x100
 #define RESULT_OFFSET_MEM	0x200
 #define INPUT_SIZE			0x4
 #define TID_0				0x0
+#define TID_1				0x1
+
+
+#define die(fmt, args ...) do { fprintf(stderr, \
+	"ERROR:%s():%u " fmt ": %s\n", \
+	__func__, __LINE__, ##args, errno ? strerror(errno) : ""); \
+	exit(EXIT_FAILURE); \
+} while (0)
 
 int InitializeMapRMs(int slot);
 int StartAccel(int slot);
@@ -26,6 +36,8 @@ int DataToAccel(int slot, uint64_t data, uint64_t size, uint8_t tid);
 int DataFromAccel(int slot, uint64_t data, uint64_t size);
 int DataToAccelDone(int slot);
 int DataFromAccelDone(int slot);
+
+uint32_t Mux = 1;
 
 // A Input Buffer
 float A[] = {
@@ -57,23 +69,26 @@ int main(void) {
 	uint32_t* vptr = (uint32_t*)bufferObject.map<int*>();
 	mapBuffer(bufferObject);
 
+	memcpy(vptr+MUX_OFFSET, &Mux, sizeof(Mux));
 	memcpy(vptr+A_OFFSET, A, sizeof(A));
 
+	DataToAccel(slot0, MUX_OFFSET_MEM, 1, TID_1);
+	if (!DataToAccelDone(slot0)) die("DataToAccelDone(%d)", slot0);
+
 	DataToAccel(slot0, A_OFFSET_MEM, INPUT_SIZE, TID_0);
-	int status = DataToAccelDone(slot0);
-	if (status) {
-		DataFromAccel(slot1, RESULT_OFFSET_MEM, INPUT_SIZE);
-		status = DataFromAccelDone(slot1);
+	if (!DataToAccelDone(slot0)) die("DataToAccelDone(%d)", slot0);
+
+	DataFromAccel(slot1, RESULT_OFFSET_MEM, INPUT_SIZE);
+	if (!DataFromAccelDone(slot1)) die("DataFromAccelDone(%d)", slot1);
+
+	printf("\t Success: Selected Operation Done !.\n");
+	memcpy(C, vptr+RESULT_OFFSET, sizeof(C));
+	for (int i = 0; i < 16; ++i) {
+		printf("%f ", C[i]);
 	}
-	if (status) {
-		printf("\t Success: Selected Operation Done !.\n");
-		memcpy(C, vptr+RESULT_OFFSET, sizeof(C));
-		for (int i = 0; i < 16; ++i) {
-			printf("%f ", C[i]);
-		}
-		putchar('\n');
-		FinaliseUnmapRMs(slot0);
-		FinaliseUnmapRMs(slot1);
-	}
+	putchar('\n');
+
+	FinaliseUnmapRMs(slot0);
+	FinaliseUnmapRMs(slot1);
 	return 0;
 }

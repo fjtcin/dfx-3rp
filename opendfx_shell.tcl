@@ -2855,7 +2855,7 @@ proc create_root_design { parentCell } {
   create_hier_cell_static_shell [current_bd_instance .] static_shell
 
   # Create interface connections
-  connect_bd_intf_net -intf_net RP_0_AXIS_OUT [get_bd_intf_pins RP_0/AXIS_OUT] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
+  connect_bd_intf_net -intf_net RP_0_AXIS_OUT [get_bd_intf_pins RP_0/AXIS_OUT1] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
   connect_bd_intf_net -intf_net RP_2_M_AXI_GMEM [get_bd_intf_pins RP_2/M_AXI_GMEM] [get_bd_intf_pins static_shell/rp2_data]
   connect_bd_intf_net -intf_net S_AXI_CTRL_1 [get_bd_intf_pins RP_1/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp1_config]
   connect_bd_intf_net -intf_net S_AXI_CTRL_5 [get_bd_intf_pins RP_0/S_AXI_CTRL] [get_bd_intf_pins static_shell/rp0_config]
