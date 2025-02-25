@@ -42,7 +42,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following
 # block design container source references:
-# TWICE0, TWICE1, TWICE2
+# TWICE0, TWICE1, TWICE2, GEMM
 
 # Please add the sources before sourcing this Tcl script.
 
@@ -63,10 +63,12 @@ if { $list_projs eq "" } {
 source ./rm_tcl/twice_0.tcl
 source ./rm_tcl/twice_1.tcl
 source ./rm_tcl/twice_2.tcl
+source ./rm_tcl/gemm.tcl
 
 cr_bd_TWICE0 "" TWICE0
 cr_bd_TWICE1 "" TWICE1
 cr_bd_TWICE2 "" TWICE2
+cr_bd_GEMM "" GEMM
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -180,7 +182,7 @@ xilinx.com:ip:util_vector_logic:2.0\
 ##################################################################
 set bCheckSources 1
 set list_bdc_active "TWICE0, TWICE1, TWICE2"
-set list_bdc_dfx ""
+set list_bdc_dfx "GEMM"
 
 array set map_bdc_missing {}
 set map_bdc_missing(ACTIVE) ""
@@ -192,6 +194,7 @@ if { $bCheckSources == 1 } {
 TWICE0 \
 TWICE1 \
 TWICE2 \
+GEMM \
 "
 
    common::send_gid_msg -ssname BD::TCL -id 2056 -severity "INFO" "Checking if the following sources for block design container exist in the project: $list_check_srcs .\n\n"
@@ -2837,8 +2840,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE2.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE2.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE2.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE2.bd} \
+   CONFIG.LIST_SIM_BD {TWICE2.bd:GEMM.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE2.bd:GEMM.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_2
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_2/M_AXI_GMEM]
@@ -2946,15 +2949,15 @@ update_compile_order -fileset sim_1
 # setup_pr_configurations
 create_pr_configuration -name config_1 -partitions [list opendfx_shell_i/RP_0:TWICE0_inst_0 opendfx_shell_i/RP_1:TWICE1_inst_0 opendfx_shell_i/RP_2:TWICE2_inst_0 ]
 set_property PR_CONFIGURATION config_1 [get_runs impl_1]
-# create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_0:FOUR_inst_0 opendfx_shell_i/RP_1:FOUR_inst_1 opendfx_shell_i/RP_2:FOUR_inst_2 ]
-# create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
+create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_2:GEMM_inst_0 ] -greyboxes [list opendfx_shell_i/RP_0 opendfx_shell_i/RP_1 ]
+create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
 
 set num_procs [exec nproc]
 launch_runs impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
-# launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
-# wait_on_run child_1_impl_1
+launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
+wait_on_run child_1_impl_1
 # wait_on_run child_2_impl_1
 # open_run impl_1
 # write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp

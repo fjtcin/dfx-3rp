@@ -3,3 +3,4 @@ LNK='-luuid -lxrt_coreutil -lxrt++ -ldfx-mgr'
 g++ -Wall -g -std=c++1y $INC lib/siha.c twice.c $LNK -o testTWICE
 g++ -Wall -g -std=c++1y $INC lib/siha.c inter_twice.c $LNK -o testINTER
 g++ -Wall -g -std=c++1y $INC lib/siha.c all_twice.c $LNK -o testALL
+g++ -Wall -g -std=c++1y $INC lib/siha.c gemm.c $LNK -o testGEMM

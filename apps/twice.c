@@ -64,6 +64,8 @@ int main(int argc, char *argv[]) {
 		printf("- Check the slot number where the accelerator is loaded and run the test on the specific slot.\n");
 		return 0;
 	}
+	StartAccel(slot);
+
 	//Allocate XRT buffer to be used for input and output of the application
 	auto device = xrt::device(0);
 	auto bufferObject = xrt::bo(device, SIZE_IN_BYTES, 0);
@@ -76,8 +78,6 @@ int main(int argc, char *argv[]) {
 	DataToAccel(slot, MUX_OFFSET_MEM, 1, TID_1);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
-	//Initialize RM
-	StartAccel(slot);
 	//Program A to Accelerator
 	DataToAccel(slot, A_OFFSET_MEM, INPUT_SIZE, TID_0);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
