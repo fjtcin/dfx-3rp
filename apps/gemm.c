@@ -60,11 +60,8 @@ float C[4*OUTPUT_SIZE];
 
 int main(void) {
 	int slot = 2;
-	//Initialize and memory map RMs
-	if (InitializeMapRMs(slot) == -1) {
-		printf("- Check the slot number where the accelerator is loaded and run the test on the specific slot.\n");
-		return 0;
-	}
+
+	if (InitializeMapRMs(slot) == -1) die("Slot number %d", slot);
 	StartAccel(slot);
 
 	//Allocate XRT buffer to be used for input and output of the application

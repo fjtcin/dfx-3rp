@@ -48,22 +48,12 @@ float A[] = {
 float C[16];
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
 	//Default slot Set to 0 unless passed as an argument
 	int slot = 0;
-	if (argc > 1) {
-		//Updating slot number provided as command line argument
-		slot = atoi(argv[1]);
-		if (slot != 0 && slot != 1 && slot != 2) {
-			printf("- Invalid slot number provided %s. Valid values : 0, 1, 2\n", argv[1]);
-			return 0;
-		}
-	}
-	//Initialize and memory map RMs
-	if (InitializeMapRMs(slot) == -1) {
-		printf("- Check the slot number where the accelerator is loaded and run the test on the specific slot.\n");
-		return 0;
-	}
+	if (argc > 1) slot = atoi(argv[1]);
+
+	if (InitializeMapRMs(slot) == -1) die("Slot number %d", slot);
 	StartAccel(slot);
 
 	//Allocate XRT buffer to be used for input and output of the application
