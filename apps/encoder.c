@@ -41,17 +41,16 @@ uint32_t Mux = 0;
 
 // A Input Buffer
 float A[] = {
-	1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 0.1, 1.2, 2.3, 3.4
+	4, 3,
+	1, 0, 3,
+	0, 2, 0,
+	1, 0, 0,
+	0, 0, 3
 };
 
-// C Output Buffer
-float C[16];
 
-
-int main(int argc, char** argv) {
-	//Default slot Set to 0 unless passed as an argument
-	int slot = 0;
-	if (argc > 1) slot = atoi(argv[1]);
+int main(void) {
+	int slot = 1;
 
 	if (InitializeMapRMs(slot) == -1) die("Slot number %d", slot);
 	StartAccel(slot);
@@ -71,16 +70,22 @@ int main(int argc, char** argv) {
 	DataToAccel(slot, A_OFFSET_MEM, INPUT_SIZE, TID_0);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
-	DataFromAccel(slot, RESULT_OFFSET_MEM, INPUT_SIZE);
+	DataFromAccel(slot, RESULT_OFFSET_MEM, 1);
+	if (!DataFromAccelDone(slot)) die("DataFromAccelDone(%d)", slot);
+	const int L = *((float*)vptr+RESULT_OFFSET+2);
+
+	DataFromAccel(slot, RESULT_OFFSET_MEM+16, (3*L+2)/4);
 	if (!DataFromAccelDone(slot)) die("DataFromAccelDone(%d)", slot);
 
 	printf("\t Success: Selected Operation Done !.\n");
-	memcpy(C, vptr+RESULT_OFFSET, sizeof(C));
-	for (int i = 0; i < 16; ++i) {
+	float* C = (float*)malloc((3*L+3) * sizeof(float));
+	memcpy(C, vptr+RESULT_OFFSET, (3*L+3) * sizeof(float));
+	for (int i = 0; i < 3*L+3; ++i) {
 		printf("%f ", C[i]);
 	}
 	putchar('\n');
 
+	free(C);
 	FinaliseUnmapRMs(slot);
 	return 0;
 }

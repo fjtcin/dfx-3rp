@@ -17,7 +17,8 @@
 #define RESULT_OFFSET		128
 #define A_OFFSET_MEM		0x100
 #define RESULT_OFFSET_MEM	0x200
-#define INPUT_SIZE			0x4
+#define INPUT_SIZE			0xA
+#define OUTPUT_SIZE			0x8
 #define TID_0				0x0
 #define TID_1				0x1
 
@@ -41,17 +42,27 @@ uint32_t Mux = 0;
 
 // A Input Buffer
 float A[] = {
-	1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 0.1, 1.2, 2.3, 3.4
+	4, 3, 5,
+	0, 0, 1,
+	0, 1, 2,
+	1, 2, 3,
+	2, 0, 4,
+	2, 2, 5,
+	0, 0,
+	3, 4, 5,
+	0, 0, 1,
+	0, 2, 2,
+	0, 3, 3,
+	1, 2, 4,
+	2, 3, 5
 };
 
 // C Output Buffer
-float C[16];
+float C[4*OUTPUT_SIZE];
 
 
-int main(int argc, char** argv) {
-	//Default slot Set to 0 unless passed as an argument
+int main(void) {
 	int slot = 0;
-	if (argc > 1) slot = atoi(argv[1]);
 
 	if (InitializeMapRMs(slot) == -1) die("Slot number %d", slot);
 	StartAccel(slot);
@@ -71,12 +82,12 @@ int main(int argc, char** argv) {
 	DataToAccel(slot, A_OFFSET_MEM, INPUT_SIZE, TID_0);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
-	DataFromAccel(slot, RESULT_OFFSET_MEM, INPUT_SIZE);
+	DataFromAccel(slot, RESULT_OFFSET_MEM, OUTPUT_SIZE);
 	if (!DataFromAccelDone(slot)) die("DataFromAccelDone(%d)", slot);
 
 	printf("\t Success: Selected Operation Done !.\n");
 	memcpy(C, vptr+RESULT_OFFSET, sizeof(C));
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 4*OUTPUT_SIZE; ++i) {
 		printf("%f ", C[i]);
 	}
 	putchar('\n');

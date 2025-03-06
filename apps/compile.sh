@@ -4,3 +4,7 @@ g++ -Wall -g -std=c++1y $INC lib/siha.c twice.c $LNK -o testTWICE
 g++ -Wall -g -std=c++1y $INC lib/siha.c inter_twice.c $LNK -o testINTER
 g++ -Wall -g -std=c++1y $INC lib/siha.c all_twice.c $LNK -o testALL
 g++ -Wall -g -std=c++1y $INC lib/siha.c gemm.c $LNK -o testGEMM
+g++ -Wall -g -std=c++1y $INC lib/siha.c decoder.c $LNK -o testDEC
+g++ -Wall -g -std=c++1y $INC lib/siha.c encoder.c $LNK -o testENC
+g++ -Wall -g -std=c++1y $INC lib/siha.c dec_enc.c $LNK -o testDEN
+g++ -Wall -g -std=c++1y $INC lib/siha.c spmm.c $LNK -o testSPMM

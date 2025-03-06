@@ -76,7 +76,6 @@ int main(void) {
 	DataToAccel(slot, MUX_OFFSET_MEM, 1, TID_1);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
-	//Program A to Accelerator
 	DataToAccel(slot, A_OFFSET_MEM, INPUT_SIZE, TID_0);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
