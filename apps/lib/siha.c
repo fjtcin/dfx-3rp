@@ -175,7 +175,7 @@ int StartAccel(int slot){
 		AccelConfig = m_rms->AccelConfig_0;
 	else if(1 == slot)
 		AccelConfig = m_rms->AccelConfig_1;
-	else if(2 == slot)
+	else //if(2 == slot)
 		AccelConfig = m_rms->AccelConfig_2;
 	*(uint32_t*)(AccelConfig) = 0x81;
 	return 0;
@@ -187,7 +187,7 @@ int StopAccel(int slot){
 		AccelConfig = m_rms->AccelConfig_0;
 	else if(1 == slot)
 		AccelConfig = m_rms->AccelConfig_1;
-	else if(2 == slot)
+	else //if(2 == slot)
 		AccelConfig = m_rms->AccelConfig_2;
 	*(uint32_t*)(AccelConfig) = 0x0;
 	return 0;
