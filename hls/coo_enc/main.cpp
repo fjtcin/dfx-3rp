@@ -1,9 +1,10 @@
+#include <math.h>
 #include <assert.h>
 #include <ap_int.h>
 #include <hls_stream.h>
 #include "coo_enc.h"
 
-#define MAX_SIZE 128
+#define MAX_SIZE 16384
 
 void inputMatrix(hls::stream<pack>& in, float* matrix, int& N, int& M, int& L) {
 	pack tmp = in.read();
@@ -48,7 +49,7 @@ void outputMatrix(hls::stream<pack>& out, const float* matrix, const int N, cons
 	for (int i = 0; i < N; ++i) {
 		for (int j = 0; j < M; ++j) {
 			float num = matrix[i*M + j];
-			if (num) {
+			if (fabsf(num) > 1e-6) {
 				// row
 				switch (p) {
 					case 0:
