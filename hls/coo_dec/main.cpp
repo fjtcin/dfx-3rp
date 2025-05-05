@@ -9,10 +9,11 @@ void inputMatrix(hls::stream<pack>& in, float* matrix, int& N, int& M) {
 	pack tmp = in.read();
 	N = tmp.num0;
 	M = tmp.num1;
+	int L = tmp.num2;
 	ap_uint<2> p = 3, q = 0;
 	int row, col;
 
-	for (int i = 0; i < 3*tmp.num2; ++i) {
+	for (int i = 0; i < 3*L; ++i) {
 		float num;
 		switch (p) {
 			case 0:
