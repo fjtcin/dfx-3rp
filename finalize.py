@@ -49,7 +49,11 @@ modules = [
     ("TWICE2", "impl_1", (False, False, True)),
     ("GEMM", "child_1_impl_1", (False, False, True)),
     ("COOdec", "child_1_impl_1", (True, False, False)),
-    ("COOenc", "child_1_impl_1", (False, True, False))
+    ("COOenc", "child_1_impl_1", (False, True, False)),
+    ("CSRdec", "child_2_impl_1", (True, False, False)),
+    ("CSRenc", "child_2_impl_1", (False, True, False)),
+    ("CSCdec", "child_3_impl_1", (True, False, False)),
+    ("CSCenc", "child_3_impl_1", (False, True, False))
 ]
 
 for module in modules:
