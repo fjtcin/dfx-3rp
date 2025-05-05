@@ -11,11 +11,9 @@ void inputMatrix(hls::stream<pack>& in, float* matrix, int& N, int& M, int& L) {
 	N = tmp.num0;
 	M = tmp.num1;
 	L = 0;
-	int st = 0;
-	const int ed = N * M;
 	ap_uint<2> p = 2;
 
-	while (st < ed) {
+	for (int i = 0; i < N*M; ++i) {
 		float num;
 		switch (p) {
 			case 0:
@@ -32,10 +30,9 @@ void inputMatrix(hls::stream<pack>& in, float* matrix, int& N, int& M, int& L) {
 				num = tmp.num3;
 				break;
 		}
-		matrix[st] = num;
-		if (num) ++L;
 		++p;
-		++st;
+		matrix[i] = num;
+		if (fabsf(num) > 1e-6) ++L;
 	}
 }
 

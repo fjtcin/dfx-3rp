@@ -11,30 +11,25 @@ void inputMatrix(hls::stream<pack>& in, float* data, int& N, int& M, int& L) {
 	N = tmp.num0;
 	M = tmp.num1;
 	L = tmp.num2;
-	int st = 0;
-	const int ed = 2*L + N + 1;
 	ap_uint<2> p = 3;
 
-	while (st < ed) {
-		float num;
+	for (int i = 0; i < 2*L + N + 1; ++i) {
 		switch (p) {
 			case 0:
 				tmp = in.read();
-				num = tmp.num0;
+				data[i] = tmp.num0;
 				break;
 			case 1:
-				num = tmp.num1;
+				data[i] = tmp.num1;
 				break;
 			case 2:
-				num = tmp.num2;
+				data[i] = tmp.num2;
 				break;
 			case 3:
-				num = tmp.num3;
+				data[i] = tmp.num3;
 				break;
 		}
 		++p;
-		++st;
-		*data++ = num;
 	}
 }
 
@@ -42,28 +37,25 @@ void outputMatrix(hls::stream<pack>& out, const float* matrix, const int N, cons
 	pack tmp;
 	tmp.num0 = N;
 	tmp.num1 = M;
-	int st = 0;
-	const int ed = N * M;
 	ap_uint<2> p = 2;
 
-	while (st < ed) {
+	for (int i = 0; i < N*M; ++i) {
 		switch (p) {
 			case 0:
 				out.write(tmp);
-				tmp.num0 = matrix[st];
+				tmp.num0 = matrix[i];
 				break;
 			case 1:
-				tmp.num1 = matrix[st];
+				tmp.num1 = matrix[i];
 				break;
 			case 2:
-				tmp.num2 = matrix[st];
+				tmp.num2 = matrix[i];
 				break;
 			case 3:
-				tmp.num3 = matrix[st];
+				tmp.num3 = matrix[i];
 				break;
 		}
 		++p;
-		++st;
 	}
 	out.write(tmp);
 }
