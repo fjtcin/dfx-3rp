@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <ap_int.h>
 #include <hls_stream.h>
-#include "csr_dec.h"
+#include "csc_dec.h"
 
 #define MAX_SIZE 16384
 #define MSIZE 4096
@@ -13,7 +13,7 @@ void inputMatrix(hls::stream<pack>& in, float* data, int& N, int& M, int& L) {
 	L = tmp.num2;
 	ap_uint<2> p = 3;
 
-	for (int i = 0; i < 2*L + N + 1; ++i) {
+	for (int i = 0; i < 2*L + M + 1; ++i) {
 		switch (p) {
 			case 0:
 				tmp = in.read();
@@ -60,7 +60,7 @@ void outputMatrix(hls::stream<pack>& out, const float* matrix, const int N, cons
 	out.write(tmp);
 }
 
-void csr_dec(hls::stream<pack>& in, hls::stream<pack>& out) {
+void csc_dec(hls::stream<pack>& in, hls::stream<pack>& out) {
 #pragma HLS INTERFACE axis port=in
 #pragma HLS INTERFACE axis port=out
 
@@ -72,11 +72,11 @@ void csr_dec(hls::stream<pack>& in, hls::stream<pack>& out) {
 
 	float* indices = data + L;
 	float* indptr = data + 2*L;
-	for (int i = 0; i < N; ++i) {
+	for (int i = 0; i < M; ++i) {
 		for (int k = (int)indptr[i]; k < (int)indptr[i+1]; ++k) {
 			int j = indices[k];
-			assert(j >= 0 && j < M);
-			a[i*M + j] = data[k];
+			assert(j >= 0 && j < N);
+			a[j*M + i] = data[k];
 		}
 	}
 
