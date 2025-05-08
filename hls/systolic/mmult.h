@@ -1,108 +1,58 @@
-/**
-* Copyright (C) 2019-2021 Xilinx, Inc
-*
-* Licensed under the Apache License, Version 2.0 (the "License"). You may
-* not use this file except in compliance with the License. A copy of the
-* License is located at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-* License for the specific language governing permissions and limitations
-* under the License.
-*/
+#include <algorithm>
 
-/*******************************************************************************
+#define TILE_SIZE 13
 
-Vitis Key Concept :
-
-    This is a matrix multiplication example which showcases the "Systolic Array"
-    based algorithm design. Systolic array type of implementation is well suited
-    for FPGAs.
-
-*******************************************************************************/
-
-/*
-
-Kernel Description :
-
-    This kernel is a systolic array based matrix multiplication. Though the
-    maximum size of the input matrices are restricted to a smaller MAX_SIZE, it
-    is still possible to use this approach and get better performance for larger
-    matrices by using tiling.
-
-    Arguments :
-
-        float *a     (input )  --> Input  Matrix A
-        float *b     (input )  --> Input  Matrix B
-        float *c     (output)  --> Output Matrix
-        int    a_row (input )  --> Row Size Matrix A
-        int    a_col (input )  --> Col Size Matrix A
-        int    b_col (input )  --> Col Size Matrix B
-
-    Kernel Configuration :
-
-        Max Size    --> 16
-
-    Note :
-        Max Size is dependent on the available DSP resources in the FPGA
-*/
-
-#include <stdio.h>
-
-// Maximum Array Size
-#define MAX_SIZE 16
-
-// TRIPCOUNT identifier
-const unsigned int c_size = MAX_SIZE;
-
-extern "C" {
-void mmult(const float* a, // Read-Only Matrix A
-           const float* b, // Read-Only Matrix B
-           float* c,       // Output Result
-           int a_row,      // Matrix A Row Size
-           int a_col,      // Matrix A Col Size
-           int b_col       // Matrix B Col Size
-           ) {
-    int b_row = a_col;
-    int c_row = a_row;
-    int c_col = b_col;
-
-    // Local memory to store input and output matrices
-    float localA[MAX_SIZE][MAX_SIZE];
+void mmult(const float* a, // Read-Only Full Matrix A
+		   const float* b, // Read-Only Full Matrix B
+		   float* c,       // Output Full Matrix C
+		   int A_ROWS,     // Full Matrix A Row Size
+		   int A_COLS,     // Full Matrix A Col Size (also B Row Size)
+		   int B_COLS      // Full Matrix B Col Size
+		   ) {
+	// Local memory to store tiles of input and output matrices
+	float localA[TILE_SIZE][TILE_SIZE];
 #pragma HLS ARRAY_PARTITION variable = localA dim = 1 complete
 
-    float localB[MAX_SIZE][MAX_SIZE];
+	float localB[TILE_SIZE][TILE_SIZE];
 #pragma HLS ARRAY_PARTITION variable = localB dim = 2 complete
 
-    float localC[MAX_SIZE][MAX_SIZE];
+	float localC[TILE_SIZE][TILE_SIZE];
 #pragma HLS ARRAY_PARTITION variable = localC dim = 0 complete
 
-// Burst reads on input matrices from global memory
-// Read Input A
-// Auto-pipeline is going to apply pipeline to these loops
-readA:
-    for (int loc = 0, i = 0, j = 0; loc < a_row * a_col; loc++, j++) {
-#pragma HLS LOOP_TRIPCOUNT min = c_size* c_size max = c_size * c_size
-        if (j == a_col) {
-            i++;
-            j = 0;
-        }
-        localA[i][j] = a[loc];
-    }
+	// Iterate over the rows of matrix A and C in tile steps
+	for (int i_outer = 0; i_outer < A_ROWS; i_outer += TILE_SIZE) {
+		int current_tile_A_rows = std::min(A_ROWS - i_outer, TILE_SIZE);
+		// Iterate over the columns of matrix B and C in tile steps
+		for (int j_outer = 0; j_outer < B_COLS; j_outer += TILE_SIZE) {
+			int current_tile_B_cols = std::min(B_COLS - j_outer, TILE_SIZE);
+			// Iterate over the shared dimension (A_COLS or B_ROWS) in tile steps
+			for (int k_outer = 0; k_outer < A_COLS; k_outer += TILE_SIZE) {
+				int current_tile_K_dim = std::min(A_COLS - k_outer, TILE_SIZE);
 
-// Read Input B
-readB:
-    for (int loc = 0, i = 0, j = 0; loc < b_row * b_col; loc++, j++) {
-#pragma HLS LOOP_TRIPCOUNT min = c_size* c_size max = c_size * c_size
-        if (j == b_col) {
-            i++;
-            j = 0;
-        }
-        localB[i][j] = b[loc];
-    }
+			// Load tile of A from global memory to localA, padding with 0 if necessary
+			// Auto-pipeline is going to apply pipeline to these loops
+			readA:
+				for (int r_a = 0; r_a < TILE_SIZE; ++r_a) {
+					for (int c_a = 0; c_a < TILE_SIZE; ++c_a) {
+						if (r_a < current_tile_A_rows && c_a < current_tile_K_dim) {
+							localA[r_a][c_a] = a[(i_outer + r_a) * A_COLS + (k_outer + c_a)];
+						} else {
+							localA[r_a][c_a] = 0; // Pad with zero
+						}
+					}
+				}
+
+			// Load tile of B from global memory to localB, padding with 0 if necessary
+			readB:
+				for (int r_b = 0; r_b < TILE_SIZE; ++r_b) { // r_b corresponds to K-dimension
+					for (int c_b = 0; c_b < TILE_SIZE; ++c_b) {
+						if (r_b < current_tile_K_dim && c_b < current_tile_B_cols) {
+							localB[r_b][c_b] = b[(k_outer + r_b) * B_COLS + (j_outer + c_b)];
+						} else {
+							localB[r_b][c_b] = 0; // Pad with zero
+						}
+					}
+				}
 
 // Perform systolic matrix multiply
 // local matrices localA and localB have been partitioned in dimensions
@@ -143,40 +93,29 @@ readB:
 //  A3_->|C30| ---- |C31| ---- |C32| ---- |C33|
 //       |___|      |___|      |___|      |___|
 
-systolic1:
-    for (int k = 0; k < a_col; k++) {
-#pragma HLS LOOP_TRIPCOUNT min = c_size max = c_size
-    systolic2:
-        for (int i = 0; i < MAX_SIZE; i++) {
+			systolic1:
+				for (int k = 0; k < current_tile_K_dim; ++k) {
+				systolic2:
+					for (int i = 0; i < TILE_SIZE; ++i) {
 #pragma HLS UNROLL
-        systolic3:
-            for (int j = 0; j < MAX_SIZE; j++) {
+					systolic3:
+						for (int j = 0; j < TILE_SIZE; ++j) {
 #pragma HLS UNROLL
-                // Get previous sum
-                float last = (k == 0) ? 0 : localC[i][j];
+							float last_sum = (k_outer || k) ? localC[i][j] : 0;
+							localC[i][j] = last_sum + localA[i][k] * localB[k][j];
+						}
+					}
+				}
+			}
 
-                // Update current sum
-                // Handle boundary conditions
-                float a_val = (i < a_row && k < a_col) ? localA[i][k] : 0;
-                float b_val = (k < b_row && j < b_col) ? localB[k][j] : 0;
-                float result = last + a_val * b_val;
-
-                // Write back results
-                localC[i][j] = result;
-            }
-        }
-    }
-
-// Burst write from output matrices to global memory
-// Burst write from matrix C
-writeC:
-    for (int loc = 0, i = 0, j = 0; loc < c_row * c_col; loc++, j++) {
-#pragma HLS LOOP_TRIPCOUNT min = c_size* c_size max = c_size * c_size
-        if (j == c_col) {
-            i++;
-            j = 0;
-        }
-        c[loc] = localC[i][j];
-    }
-}
+		// Burst write from output matrices to global memory
+		// Burst write from matrix C
+		writeC:
+			for (int r_c = 0; r_c < current_tile_A_rows; ++r_c) {
+				for (int c_c = 0; c_c < current_tile_B_cols; ++c_c) {
+					c[(i_outer + r_c) * B_COLS + (j_outer + c_c)] = localC[r_c][c_c];
+				}
+			}
+		}
+	}
 }

@@ -4,7 +4,7 @@
 #include "gemm.h"
 #include "mmult.h"
 
-#define MSIZE 16384
+#define MAX_SIZE 16384
 
 void inputMatrix(hls::stream<pack>& in, float* matrix, int& N, int& M) {
 	pack tmp = in.read();
@@ -63,7 +63,7 @@ void gemm(hls::stream<pack>& in, hls::stream<pack>& out) {
 #pragma HLS INTERFACE axis port=in
 #pragma HLS INTERFACE axis port=out
 
-	float a[MSIZE], b[MSIZE], c[MSIZE];
+	float a[MAX_SIZE], b[MAX_SIZE], c[MAX_SIZE];
 	int N, M, K, K2;
 
 	inputMatrix(in, a, N, K);
