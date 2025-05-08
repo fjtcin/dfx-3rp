@@ -2832,8 +2832,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE0.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE0.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE0.bd:COOdec.bd:CSRdec.bd:CSCdec.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE0.bd:COOdec.bd:CSRdec.bd:CSCdec.bd} \
+   CONFIG.LIST_SIM_BD {TWICE0.bd:COOdec.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE0.bd:COOdec.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_0
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_0/M_AXI_GMEM]
@@ -2845,8 +2845,8 @@ proc create_root_design { parentCell } {
    CONFIG.ACTIVE_SIM_BD {TWICE1.bd} \
    CONFIG.ACTIVE_SYNTH_BD {TWICE1.bd} \
    CONFIG.ENABLE_DFX {true} \
-   CONFIG.LIST_SIM_BD {TWICE1.bd:COOenc.bd:CSRenc.bd:CSCenc.bd} \
-   CONFIG.LIST_SYNTH_BD {TWICE1.bd:COOenc.bd:CSRenc.bd:CSCenc.bd} \
+   CONFIG.LIST_SIM_BD {TWICE1.bd:COOenc.bd} \
+   CONFIG.LIST_SYNTH_BD {TWICE1.bd:COOenc.bd} \
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_1
   set_property APERTURES {{0x0 2G} {0xC000_0000 512M} {0xFF00_0000 16M} {0x8_0000_0000 32G}} [get_bd_intf_pins /RP_1/M_AXI_GMEM]
@@ -2969,19 +2969,19 @@ create_pr_configuration -name config_1 -partitions [list opendfx_shell_i/RP_0:TW
 set_property PR_CONFIGURATION config_1 [get_runs impl_1]
 create_pr_configuration -name config_2 -partitions [list opendfx_shell_i/RP_0:COOdec_inst_0 opendfx_shell_i/RP_1:COOenc_inst_0 opendfx_shell_i/RP_2:GEMM_inst_0 ]
 create_run child_1_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_2
-create_pr_configuration -name config_3 -partitions [list opendfx_shell_i/RP_0:CSRdec_inst_0 opendfx_shell_i/RP_1:CSRenc_inst_0 ] -greyboxes [list opendfx_shell_i/RP_2 ]
-create_run child_2_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_3
-create_pr_configuration -name config_4 -partitions [list opendfx_shell_i/RP_0:CSCdec_inst_0 opendfx_shell_i/RP_1:CSCenc_inst_0 ] -greyboxes [list opendfx_shell_i/RP_2 ]
-create_run child_3_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_4
+# create_pr_configuration -name config_3 -partitions [list opendfx_shell_i/RP_0:CSRdec_inst_0 opendfx_shell_i/RP_1:CSRenc_inst_0 ] -greyboxes [list opendfx_shell_i/RP_2 ]
+# create_run child_2_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_3
+# create_pr_configuration -name config_4 -partitions [list opendfx_shell_i/RP_0:CSCdec_inst_0 opendfx_shell_i/RP_1:CSCenc_inst_0 ] -greyboxes [list opendfx_shell_i/RP_2 ]
+# create_run child_3_impl_1 -parent_run impl_1 -flow {Vivado Implementation 2022} -pr_config config_4
 
 set num_procs [exec nproc]
 launch_runs impl_1 -to_step write_bitstream -jobs 24
 wait_on_run impl_1
 # write_hw_platform -fixed -include_bit -force -file ./project_1/opendfx_shell_wrapper.xsa
-launch_runs child_1_impl_1 child_2_impl_1 child_3_impl_1 -to_step write_bitstream -jobs $num_procs
+launch_runs child_1_impl_1 -to_step write_bitstream -jobs $num_procs
 wait_on_run child_1_impl_1
-wait_on_run child_2_impl_1
-wait_on_run child_3_impl_1
+# wait_on_run child_2_impl_1
+# wait_on_run child_3_impl_1
 # open_run impl_1
 # write_abstract_shell -force -cell opendfx_shell_i/RP_0 ./create_new_rm/abstract_shells/abstract_shell_RP_0.dcp
 # write_abstract_shell -force -cell opendfx_shell_i/RP_1 ./create_new_rm/abstract_shells/abstract_shell_RP_1.dcp
