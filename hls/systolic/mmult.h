@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#define TILE_SIZE 13
+#define TILE_SIZE 12
 
 void mmult(const float* a, // Read-Only Full Matrix A
 		   const float* b, // Read-Only Full Matrix B
