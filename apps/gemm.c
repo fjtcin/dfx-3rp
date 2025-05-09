@@ -14,10 +14,10 @@
 #define MUX_OFFSET			0
 #define MUX_OFFSET_MEM		0x0
 
-#define A_OFFSET			64
+#define A_OFFSET			0x10
 #define B_OFFSET			0x4014      // 0x10 + 16388
 #define C_OFFSET			0x8018
-#define A_OFFSET_MEM		0x100
+#define A_OFFSET_MEM		0x40
 #define B_OFFSET_MEM		0x10050
 #define C_OFFSET_MEM		0x20060
 #define TID_0				0x0
