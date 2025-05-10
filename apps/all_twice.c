@@ -101,5 +101,6 @@ int main(void) {
 
 	FinaliseUnmapRMs(slot0);
 	FinaliseUnmapRMs(slot1);
+	FinaliseUnmapRMs(slot2);
 	return 0;
 }
