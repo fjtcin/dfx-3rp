@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <chrono>
 
 // XRT includes
 #include "experimental/xrt_bo.h"
@@ -78,6 +79,8 @@ int main(int argc, char** argv) {
 	memcpy(vptr+A_OFFSET, A, A_input_size*4);
 	memcpy(vptr+B_OFFSET, B, B_input_size*4);
 
+auto start_time = std::chrono::high_resolution_clock::now();
+for (int i = 0; i < 100; ++i) {
 	DataToAccel(slot, MUX_OFFSET_MEM, 1, TID_1);
 	if (!DataToAccelDone(slot)) die("DataToAccelDone(%d)", slot);
 
@@ -94,6 +97,11 @@ int main(int argc, char** argv) {
 
 	DataFromAccel(slot, C_OFFSET_MEM+16, (output_size-1)/4);
 	if (!DataFromAccelDone(slot)) die("DataFromAccelDone(%d)", slot);
+}
+auto end_time = std::chrono::high_resolution_clock::now();
+auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+double average_ms = static_cast<double>(duration_ns.count()) / 100 / 1000000;
+printf("Average time taken: %.6f ms\n", average_ms);
 
 	printf("\t Success: Selected Operation Done !.\n");
 	memcpy(C, vptr+C_OFFSET, output_size*4);

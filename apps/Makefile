@@ -6,17 +6,20 @@ UTILS=lib/siha.c lib/stream_utils.cpp
 
 BINARIES_TEST=twice inter_twice all_twice
 BINARIES_SPMM=gemm decoder encoder dec_enc spmm
+BINARIES_CPU=cpu_gemm
 
-all: test matrix
+all: test matrix cpu
 
 test: $(BINARIES_TEST)
 
 matrix: $(BINARIES_SPMM)
 
+cpu: $(BINARIES_CPU)
+
 %: %.c $(UTILS)
 	$(CC) $(CFLAGS) $(INC) $^ $(LIBS) -o $@
 
 clean:
-	rm -f $(BINARIES_TEST) $(BINARIES_SPMM)
+	rm -f $(BINARIES_TEST) $(BINARIES_SPMM) $(BINARIES_CPU)
 
-.PHONY: all test matrix clean
+.PHONY: all test matrix cpu clean
