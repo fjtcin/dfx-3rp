@@ -130,7 +130,7 @@ if __name__ == "__main__":
     print("\nGenerating matrix B...")
     # Using a different random_state for B to make it different from A.
     B = sparse_random(
-        ROWS, COLS,
+        COLS, ROWS,
         density=DENSITY,
         format='coo',
         dtype=np.float64,
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # Its density can be different from A or B.
     C.sum_duplicates()
     C.eliminate_zeros()
-    print(f"Matrix C calculated: {C.shape}, NNZ={C.nnz}, Density={C.nnz/(ROWS*COLS)*100:.4f}%")
+    print(f"Matrix C calculated: {C.shape}, NNZ={C.nnz}, Density={C.nnz/(ROWS*ROWS)*100:.4f}%")
     if C.nnz == 0:
         print("Warning: Matrix C has no non-zero elements. This can happen with sparse matrices.")
         # If C is all zeros, ensure it has the correct shape for saving.

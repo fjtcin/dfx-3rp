@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 	if (readStream(argv[2], B, B_input_size)) die("readStream");
 
 	float a[16384], b[16384], c[16384];
-	const int N = A[0], K = A[1], M = B[0];
+	const int N = A[0], K = A[1], M = B[1];
 	memcpy(a, A+2, (A_input_size-2)*4);
 	memcpy(b, B+2, (B_input_size-2)*4);
 
