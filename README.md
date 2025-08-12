@@ -14,7 +14,7 @@ compression, and multiplication operations for COO, CSR, and CSC sparse formats.
 
 ## Reproduction Steps
 
-Note: We also provide ready-to-use binaries at [this repo](https://github.com/fjtcin/dfx-3rp-bin).
+Note: We also provide ready-to-use binaries in [this repo](https://github.com/fjtcin/dfx-3rp-bin).
 
 ### High-Level Synthesis (HLS)
 
@@ -55,9 +55,11 @@ python finalize.py
 
     These modules are designed to be dynamically loaded into the RPs, enabling the system to configure the appropriate hardware acceleration logic and switch its handling of different sparse matrix formats based on specific task requirements.
 
-* The designed RMs all adopt standard AXI interface protocols. The AXIMM interface is used for efficient access to the KV260's shared DDR memory, enabling high-throughput for large-scale data. The AXIS interface is used to connect different RMs, supporting the construction of dataflow-driven computational pipelines within the FPGA. The system runs on an Ubuntu Linux operating system on the KV260's ARM processor. Through the Xilinx Runtime (XRT) library, unified management and invocation of FPGA hardware resources (including DFX operations and RM task execution) by the upper-layer software are achieved, creating a complete heterogeneous accelerated computing platform.
+* The designed RMs all adopt standard AXI interface protocols. The AXIMM interface is used for efficient access to the KV260's shared DDR memory, enabling high-throughput for large-scale data. The AXIS interface is used to connect different RMs, supporting the construction of dataflow-driven computational pipelines within the FPGA. The system runs on an Ubuntu Linux operating system on the KV260's ARM processor. Through the Xilinx Runtime (XRT) library, application software can manage and invoke FPGA hardware resources (including DFX operations and RM task execution).
 
 ## Experiement Results
+
+Dense matrix multiplication (GEMM):
 
 | Matrix Size | CPU Time (ms) | FPGA time (ms) | Speedup |
 | :---: | :---: | :---: | :---: |
@@ -84,7 +86,7 @@ As shown in the figure, we have divided the FPGA into a *static region* on the l
 
 The static region contains the fundamental logic necessary for system operation, such as the interface controller for the PS (Processing System), clock management, interrupt management, and the FIFO buffers that connect to the RPs. This design successfully implements three independent RPs, which provide the physical foundation for dynamically loading different computational modules. Each RP is designed to accommodate one RM.
 
-The specific RMs deployed include a sparse matrix decompression module, a dense matrix multiplication module that uses a systolic array combined with a tiling strategy (more info [here](hls/gemm/)), and a sparse matrix compression module. These modules are all written in Vitis HLS and, through carefully designed `pragma` directives, achieve a high degree of parallel computation and pipelined operations. This maximizes the utilization of the FPGA's hardware resources and enhances computational efficiency.
+The specific RMs deployed include a sparse matrix decompression module, a dense matrix multiplication module that uses a systolic array combined with a tiling strategy (more info [here](hls/systolic/)), and a sparse matrix compression module. These modules are all written in Vitis HLS and, through carefully designed `pragma` directives, achieve a high degree of parallel computation and pipelined operations. This maximizes the utilization of the FPGA's hardware resources and enhances computational efficiency.
 
 ### Interconnection
 
@@ -92,16 +94,14 @@ The specific RMs deployed include a sparse matrix decompression module, a dense 
 
 ![Address Space](imgs/mem.png)
 
-Interface design is crucial for ensuring efficient data flow and the collaborative operation of modules. As shown in the first figure, the AXI4 Memory Mapped (AXIMM) protocol is adopted for the interaction between the RPs and the KV260's on-chip memory. This allows each dynamically loaded RM to directly and efficiently perform read and write operations on the main system memory, providing a high-bandwidth channel for the transmission of large-scale matrix data.
+Interface design is crucial for ensuring efficient data flow and the collaborative operation of modules. As shown in the first figure, the AXI4 Memory Mapped (AXIMM) protocol is adopted for the interaction between the RPs and the KV260's on-chip memory. This allows each dynamically loaded RM to directly and efficiently perform read and write operations on the main system memory, providing a high-bandwidth channel for the transmission of large-scale matrix data. The exchange of control and status signals (CONFIG) between the static and dynamic regions is implemented through the AXI4 Lite interface. The second figure illustrates the address space allocated for the AXIMM and AXI4 Lite interfaces.
 
-The exchange of control and status signals (CONFIG) between the static and dynamic regions, as well as between the dynamic regions and the PS (Processing System), is implemented through the AXI4 Lite interface. The second figure illustrates the address space allocated for the AXIMM and AXI4 Lite interfaces.
-
-Simultaneously, to enable data stream transfer and cooperative processing between RMs (for instance, to send decompressed data directly to the multiplication module), we have designed an interconnection interface based on the AXI4 Stream (AXIS) protocol. This streaming interface is highly suitable for pipelined processing flows and can effectively reduce the latency of data transfer between modules. We have added FIFO buffers between the RPs to achieve better pipelining.
+To enable data stream transfer and cooperative processing between RMs (for instance, to send decompressed data directly to the multiplication module), we have designed an interconnection interface based on the AXI4 Stream (AXIS) protocol. This streaming interface is highly suitable for pipelined processing flows and can effectively reduce the latency of data transfer between modules. We have added FIFO buffers between the RPs to achieve better pipelining.
 
 ### Reconfigurable Modules
 
 ![RM](imgs/rp2.png)
 
-Using the dense matrix multiplication RP as an example, the figure illustrates the internal structure of an RP. Besides the accelerator kernel written in HLS, the most crucial component is the `rm_comm_box` data mover IP core. It is equipped with an AXIMM interface (DMA) for reading from and writing to memory such as DDR/BRAM, an AXIS output port for providing input to the accelerator, and an AXIS input port for reading data from the accelerator. This IP core contains two engines: the mm2s engine reads data from a memory address via AXIMM and provides it through the AXIS stream output port; the s2mm engine performs the reverse process.
+Using the dense matrix multiplication RP as an example, the figure illustrates the internal structure of an RP. Besides the HLS accelerator kernel, the most crucial component is the `rm_comm_box` data mover IP core. It is equipped with an AXIMM interface (DMA) for reading from and writing to memory such as DDR/BRAM, an AXIS output port for providing input to the accelerator, and an AXIS input port for reading data from the accelerator. This IP core contains two engines: the mm2s engine reads data from a memory address via AXIMM and provides it through the AXIS stream output port; the s2mm engine performs the reverse process.
 
-Since the input/output source of an RP is not fixed (it could be the DDR AXIMM or an AXIS port from another RP), we have written two data selectors. The control signals for these data selectors are transmitted through a virtual AXIS channel provided by the `rm_comm_box` (managed by the host application), which is distinct from other control signals transmitted via AXI Lite.
+Since the input/output source of an RP is not fixed (it could be the DDR AXIMM or an AXIS port from another RP), we have implemented two multiplexers. The control signals for these multiplexers are transmitted through a virtual AXIS channel provided by the `rm_comm_box` (managed by the host application), which is distinct from other control signals transmitted via AXI Lite.
