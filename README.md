@@ -76,7 +76,7 @@ Dense matrix multiplication (GEMM):
 
 ## Hardware Design Details
 
-This project is based on [Xilinx's DFX Example](https://xilinx.github.io/kria-apps-docs/dfx/build/html/docs/DFX_Landing_Page.html). Check out [this slide]() for some gory details of implementation.
+This project is based on [Xilinx's DFX Example](https://xilinx.github.io/kria-apps-docs/dfx/build/html/docs/DFX_Landing_Page.html). Check out [this slide](imgs/dfx-3rp.pdf) for some gory details of implementation.
 
 ### Overview
 
